@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resources - Cloud Architect Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --brand-primary: #6B46C1;
+            --background-light: #F7FAFC;
+            --background-medium: #EDF2F7;
+            --text-primary: #2D3748;
+            --text-secondary: #4A5568;
+            --border-color: #CBD5E0;
+            --shadow-light: rgba(0, 0, 0, 0.05);
+        }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--background-light); 
+            color: var(--text-primary);
+        }
+        .resource-card {
+            background-color: white;
+            border-radius: 0.5rem;
+            border: 1px solid var(--border-color);
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+        }
+        .resource-card:hover {
+            border-color: var(--brand-primary);
+            background-color: #FAF5FF;
+        }
+        .resource-card a:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px var(--brand-primary);
+            border-radius: 0.375rem;
+        }
+        nav a:hover:not(.active) { background-color: var(--background-medium); }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+
+    <nav class="bg-white shadow-sm z-30 border-b" style="border-color: var(--border-color);">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <svg class="h-8 w-8" style="color: var(--brand-primary);" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/>
+                    </svg>
+                    <span class="font-bold text-xl ml-2 text-gray-800">Cloud Architect Pro</span>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="index.html" class="text-gray-500 px-3 py-2 rounded-md text-sm font-medium">Visualiser</a>
+                        <a href="learn.html" class="text-gray-500 px-3 py-2 rounded-md text-sm font-medium">Learn</a>
+                        <a href="quiz.html" class="text-gray-500 px-3 py-2 rounded-md text-sm font-medium">Quiz</a>
+                        <a href="resources.html" class="active text-white px-3 py-2 rounded-md text-sm font-medium" style="background-color: var(--brand-primary);">Resources</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-grow container mx-auto px-6 py-12">
+        <header class="text-center mb-12">
+            <h1 class="text-5xl font-bold tracking-tight" style="color: var(--brand-primary);">Official Resources</h1>
+            <p class="mt-4 text-lg" style="color: var(--text-secondary);">Direct links to the official documentation and learning portals from the top cloud providers.</p>
+        </header>
+
+        <section class="mb-12">
+            <h2 class="text-3xl font-bold border-b pb-4 mb-8 flex items-center gap-4"><i class="fab fa-aws" style="color: #FF9900;"></i>Amazon Web Services</h2>
+            <div class="grid md:grid-cols-2 gap-6">
+                <div class="resource-card">
+                    <a href="https://docs.aws.amazon.com/" class="w-full p-4 flex items-center gap-4" target="_blank" rel="noopener">
+                        <i class="fas fa-book text-3xl text-white p-3 rounded-full" style="background-color: #232F3E;"></i>
+                        <div>
+                            <h3 class="font-semibold">AWS Documentation</h3>
+                            <p class="text-sm" style="color: var(--text-secondary);">The complete official documentation for all AWS services.</p>
+                        </div>
+                    </a>
+                </div>
+                <div class="resource-card">
+                    <a href="https://explore.skillbuilder.aws/" class="w-full p-4 flex items-center gap-4" target="_blank" rel="noopener">
+                        <i class="fas fa-chalkboard-teacher text-3xl text-white p-3 rounded-full" style="background-color: #FF9900;"></i>
+                        <div>
+                            <h3 class="font-semibold">AWS Skill Builder</h3>
+                            <p class="text-sm" style="color: var(--text-secondary);">Access over 600 free digital courses and learning plans.</p>
+                        </div>
+                    </a>
+                </div>
+                <div class="resource-card">
+                    <a href="https://aws.amazon.com/architecture/well-architected/" class="w-full p-4 flex items-center gap-4" target="_blank" rel="noopener">
+                        <i class="fas fa-check-double text-3xl text-white p-3 rounded-full" style="background-color: #5A6573;"></i>
+                        <div>
+                            <h3 class="font-semibold">Well-Architected Framework</h3>
+                            <p class="text-sm" style="color: var(--text-secondary);">Learn AWS best practices for designing resilient and efficient infrastructure.</p>
+                        </div>
+                    </a>
+                </div>
+                <div class="resource-card">
+                    <a href="https://calculator.aws.amazon.com/" class="w-full p-4 flex items-center gap-4" target="_blank" rel="noopener">
+                        <i class="fas fa-calculator text-3xl text-white p-3 rounded-full" style="background-color: #D94A38;"></i>
+                        <div>
+                            <h3 class="font-semibold">AWS Pricing Calculator</h3>
+                            <p class="text-sm" style="color: var(--text-secondary);">Estimate your monthly costs for any combination of AWS services.</p>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+            <section class="mb-12">
+                <h2 class="text-3xl font-bold border-b pb-4 mb-8 flex items-center gap-4"><i class="fab fa-microsoft" style="color: #0078D4;"></i>Microsoft Azure</h2>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="resource-card">
+                        <a href="https://learn.microsoft.com/en-us/azure/" class="w-full p-4 flex items-center gap-4" target="_blank" rel="noopener">
+                            <i class="fas fa-book text-3xl text-white p-3 rounded-full" style="background-color: #0078D4;"></i>
+                            <div>
+                                <h3 class="font-semibold">Azure Documentation</h3>
+                                <p class="text-sm" style="color: var(--text-secondary);">Official docs for all Azure services and features.</p>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="resource-card">
+                        <a href="https://learn.microsoft.com/en-us/training/azure/" class="w-full p-4 flex items-center gap-4" target="_blank" rel="noopener">
+                            <i class="fas fa-chalkboard-teacher text-3xl text-white p-3 rounded-full" style="background-color: #00BCF2;"></i>
+                            <div>
+                                <h3 class="font-semibold">Microsoft Learn</h3>
+                                <p class="text-sm" style="color: var(--text-secondary);">Free interactive training and learning paths for Azure.</p>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="resource-card">
+                        <a href="https://learn.microsoft.com/en-us/azure/architecture/framework/" class="w-full p-4 flex items-center gap-4" target="_blank" rel="noopener">
+                            <i class="fas fa-check-double text-3xl text-white p-3 rounded-full" style="background-color: #6B46C1;"></i>
+                            <div>
+                                <h3 class="font-semibold">Well-Architected Framework</h3>
+                                <p class="text-sm" style="color: var(--text-secondary);">Azure best practices for building reliable and secure solutions.</p>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="resource-card">
+                        <a href="https://azure.microsoft.com/en-us/pricing/calculator/" class="w-full p-4 flex items-center gap-4" target="_blank" rel="noopener">
+                            <i class="fas fa-calculator text-3xl text-white p-3 rounded-full" style="background-color: #0078D4;"></i>
+                            <div>
+                                <h3 class="font-semibold">Azure Pricing Calculator</h3>
+                                <p class="text-sm" style="color: var(--text-secondary);">Estimate costs for Azure services and workloads.</p>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </section>
+
+            <section class="mb-12">
+                <h2 class="text-3xl font-bold border-b pb-4 mb-8 flex items-center gap-4"><i class="fab fa-google" style="color: #4285F4;"></i>Google Cloud Platform</h2>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="resource-card">
+                        <a href="https://cloud.google.com/docs" class="w-full p-4 flex items-center gap-4" target="_blank" rel="noopener">
+                            <i class="fas fa-book text-3xl text-white p-3 rounded-full" style="background-color: #4285F4;"></i>
+                            <div>
+                                <h3 class="font-semibold">GCP Documentation</h3>
+                                <p class="text-sm" style="color: var(--text-secondary);">Official documentation for Google Cloud services.</p>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="resource-card">
+                        <a href="https://cloudskillsboost.google/" class="w-full p-4 flex items-center gap-4" target="_blank" rel="noopener">
+                            <i class="fas fa-chalkboard-teacher text-3xl text-white p-3 rounded-full" style="background-color: #0F9D58;"></i>
+                            <div>
+                                <h3 class="font-semibold">Cloud Skills Boost</h3>
+                                <p class="text-sm" style="color: var(--text-secondary);">Google's official learning platform for GCP skills.</p>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="resource-card">
+                        <a href="https://cloud.google.com/architecture/framework" class="w-full p-4 flex items-center gap-4" target="_blank" rel="noopener">
+                            <i class="fas fa-check-double text-3xl text-white p-3 rounded-full" style="background-color: #EA4335;"></i>
+                            <div>
+                                <h3 class="font-semibold">Architecture Framework</h3>
+                                <p class="text-sm" style="color: var(--text-secondary);">GCP best practices for designing cloud solutions.</p>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="resource-card">
+                        <a href="https://cloud.google.com/products/calculator" class="w-full p-4 flex items-center gap-4" target="_blank" rel="noopener">
+                            <i class="fas fa-calculator text-3xl text-white p-3 rounded-full" style="background-color: #F4B400;"></i>
+                            <div>
+                                <h3 class="font-semibold">GCP Pricing Calculator</h3>
+                                <p class="text-sm" style="color: var(--text-secondary);">Estimate costs for Google Cloud services and products.</p>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+    <footer class="w-full py-6 mt-12" style="background-color: var(--background-medium); border-top: 1px solid var(--border-color);">
+        <div class="container mx-auto text-center" style="color: var(--text-secondary);">
+            <p>&copy; 2025 Cloud Architect Pro. All rights reserved.</p>
+        </div>
+    </footer>
+
+</body>
+</html>

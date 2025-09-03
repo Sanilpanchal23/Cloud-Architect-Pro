@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz - Cloud Architect Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --brand-primary: #6B46C1;
+            --brand-primary-light: #805AD5;
+            --brand-primary-dark: #553C9A;
+            --background-light: #F7FAFC;
+            --background-medium: #EDF2F7;
+            --text-primary: #2D3748;
+            --text-secondary: #4A5568;
+            --border-color: #CBD5E0;
+            --shadow-light: rgba(0, 0, 0, 0.05);
+        }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--background-light); 
+            color: var(--text-primary);
+        }
+        .difficulty-card {
+            background-color: white;
+            border-radius: 0.75rem;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px -1px var(--shadow-light);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .difficulty-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            border-color: var(--brand-primary);
+        }
+        .btn-primary {
+            background-color: var(--brand-primary);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+        }
+        .btn-primary:hover {
+            background-color: var(--brand-primary-dark);
+        }
+        .quiz-option {
+            border: 1px solid var(--border-color);
+            transition: all 0.2s ease;
+        }
+        .quiz-option:hover {
+            background-color: #E2E8F0;
+            border-color: var(--brand-primary);
+        }
+        .quiz-option input:checked + label {
+            border-color: var(--brand-primary);
+            background-color: #E9D8FD;
+            font-weight: 600;
+        }
+        nav a:hover:not(.active) { background-color: var(--background-medium); }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+
+    <nav class="bg-white shadow-sm z-30 border-b" style="border-color: var(--border-color);">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <svg class="h-8 w-8" style="color: var(--brand-primary);" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/>
+                    </svg>
+                    <span class="font-bold text-xl ml-2 text-gray-800">Cloud Architect Pro</span>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="index.html" class="text-gray-500 px-3 py-2 rounded-md text-sm font-medium">Visualiser</a>
+                        <a href="learn.html" class="text-gray-500 px-3 py-2 rounded-md text-sm font-medium">Learn</a>
+                        <a href="quiz.html" class="active text-white px-3 py-2 rounded-md text-sm font-medium" style="background-color: var(--brand-primary);">Quiz</a>
+                        <a href="resources.html" class="text-gray-500 px-3 py-2 rounded-md text-sm font-medium">Resources</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-grow container mx-auto px-6 py-12 flex flex-col items-center justify-center">
+
+        <div id="quiz-selection" class="w-full text-center">
+            <header class="mb-12">
+                <h1 class="text-5xl font-bold tracking-tight" style="color: var(--brand-primary);">Test Your Knowledge</h1>
+                <p class="mt-4 text-lg" style="color: var(--text-secondary);">Select a difficulty to begin your quiz.</p>
+            </header>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+                <div class="difficulty-card p-8" onclick="startQuiz('Beginner')">
+                    <i class="fas fa-seedling text-5xl mb-4 text-green-500"></i>
+                    <h2 class="text-2xl font-bold mb-2">Beginner</h2>
+                    <p style="color: var(--text-secondary);">Test your understanding of foundational cloud concepts and terminology.</p>
+                </div>
+                <div class="difficulty-card p-8" onclick="startQuiz('Intermediate')">
+                    <i class="fas fa-graduation-cap text-5xl mb-4 text-blue-500"></i>
+                    <h2 class="text-2xl font-bold mb-2">Intermediate</h2>
+                    <p style="color: var(--text-secondary);">Challenge your knowledge of core service features and common use cases.</p>
+                </div>
+                <div class="difficulty-card p-8" onclick="startQuiz('Advanced')">
+                    <i class="fas fa-rocket text-5xl mb-4 text-purple-500"></i>
+                    <h2 class="text-2xl font-bold mb-2">Advanced</h2>
+                    <p style="color: var(--text-secondary);">Assess your ability to solve complex architectural and security scenarios.</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="quiz-interface" class="w-full max-w-3xl hidden">
+            <div class="bg-white p-8 rounded-xl shadow-lg border relative" style="border-color: var(--border-color);">
+                <button id="close-quiz" aria-label="Close Quiz" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-2xl focus:outline-none" onclick="showConfirmExit()">
+                    <i class="fas fa-times"></i>
+                </button>
+                <!-- Confirmation Popup -->
+                <div id="confirm-exit-popup" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 hidden">
+                    <div class="bg-white rounded-lg shadow-lg p-8 max-w-sm w-full text-center border" style="border-color: var(--border-color);">
+                        <h3 class="text-xl font-semibold mb-4">Exit Quiz?</h3>
+                        <p class="mb-6 text-gray-600">Are you sure you want to exit the quiz? Your progress will be lost.</p>
+                        <div class="flex justify-center gap-4">
+                            <button onclick="hideConfirmExit()" class="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium">Cancel</button>
+                            <button onclick="confirmExitQuiz()" class="px-4 py-2 rounded bg-red-500 hover:bg-red-600 text-white font-medium">Exit</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex justify-between items-center mb-4">
+                    <h2 id="quiz-title" class="text-2xl font-bold" style="color: var(--brand-primary);">Beginner Quiz</h2>
+                    <p class="font-semibold text-gray-600">Question <span id="question-number">1</span> of 10</p>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2.5 mb-6">
+                    <div id="progress-bar" class="bg-green-500 h-2.5 rounded-full" style="width: 10%"></div>
+                </div>
+
+                <p id="question-text" class="text-xl mb-6">Which AWS service provides scalable object storage?</p>
+                
+                <div id="options-container" class="space-y-4">
+                    <!-- Options will be rendered by JS -->
+                </div>
+
+                <div id="nav-buttons" class="mt-8 flex justify-end"></div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="w-full py-6" style="background-color: var(--background-medium); border-top: 1px solid var(--border-color);">
+        <div class="container mx-auto text-center" style="color: var(--text-secondary);">
+            <p>&copy; 2025 Cloud Architect Pro. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        function showConfirmExit() {
+            document.getElementById('confirm-exit-popup').classList.remove('hidden');
+        }
+        function hideConfirmExit() {
+            document.getElementById('confirm-exit-popup').classList.add('hidden');
+        }
+        function confirmExitQuiz() {
+            document.getElementById('confirm-exit-popup').classList.add('hidden');
+            document.getElementById('quiz-interface').classList.add('hidden');
+            document.getElementById('quiz-selection').classList.remove('hidden');
+        }
+        // Bank of 50 UK English questions for each difficulty
+        const quizzes = {
+            Beginner: [
+                {question: "Which of these is a cloud computing provider?", options: ["Amazon Web Services", "Microsoft Word", "Adobe Photoshop"], answer: 0},
+                {question: "What does 'cloud' in cloud computing refer to?", options: ["Remote servers accessed via the internet", "Rainy weather", "Local hard drives"], answer: 0},
+                {question: "Which service is used for storing files online?", options: ["Dropbox", "Notepad", "Calculator"], answer: 0},
+                {question: "Which company offers Azure cloud services?", options: ["Microsoft", "Apple", "Google"], answer: 0},
+                {question: "What is the main benefit of cloud computing?", options: ["Scalability", "Manual updates", "Physical servers only"], answer: 0},
+                {question: "Which is a UK-based cloud provider?", options: ["UKCloud", "AWS", "Google Cloud"], answer: 0},
+                {question: "What is a data centre?", options: ["A facility for servers", "A type of software", "A cloud service"], answer: 0},
+                {question: "Which is a public cloud?", options: ["AWS", "Private server", "Local network"], answer: 0},
+                {question: "What does SaaS stand for?", options: ["Software as a Service", "Security as a Service", "Storage as a Service"], answer: 0},
+                {question: "Which is a cloud storage service?", options: ["Dropbox", "Excel", "Photoshop"], answer: 0},
+                {question: "Which of these is NOT a cloud provider?", options: ["AWS", "Google Cloud", "Windows XP"], answer: 2},
+                {question: "What is the main advantage of cloud backup?", options: ["Remote access", "Slower speeds", "Manual copying"], answer: 0},
+                {question: "Which is a type of cloud deployment?", options: ["Public", "Private", "Both"], answer: 2},
+                {question: "Which service is used for email in the cloud?", options: ["Gmail", "Paint", "Notepad"], answer: 0},
+                {question: "What is the UK government cloud framework called?", options: ["G-Cloud", "Azure", "AWS"], answer: 0},
+                {question: "Which is a benefit of cloud computing?", options: ["On-demand resources", "Fixed resources", "Manual scaling"], answer: 0},
+                {question: "Which is a cloud-based productivity suite?", options: ["Google Workspace", "MS-DOS", "Lotus 1-2-3"], answer: 0},
+                {question: "What is the main use of OneDrive?", options: ["File storage", "Gaming", "Video editing"], answer: 0},
+                {question: "Which is a cloud-based video conferencing tool?", options: ["Zoom", "Paint", "WordPad"], answer: 0},
+                {question: "Which is a UK government security standard?", options: ["Cyber Essentials", "ISO 9001", "PCI DSS"], answer: 0},
+                {question: "Which is a cloud-based CRM?", options: ["Salesforce", "Excel", "Notepad"], answer: 0},
+                {question: "Which is a cloud-based file sharing service?", options: ["Google Drive", "Word", "PowerPoint"], answer: 0},
+                {question: "Which is a cloud-based note-taking app?", options: ["Evernote", "Paint", "Calculator"], answer: 0},
+                {question: "Which is a cloud-based calendar app?", options: ["Google Calendar", "MS Paint", "Notepad"], answer: 0},
+                {question: "Which is a cloud-based project management tool?", options: ["Trello", "WordPad", "Paint"], answer: 0},
+                {question: "Which is a cloud-based accounting software?", options: ["Xero", "Excel", "Notepad"], answer: 0},
+                {question: "Which is a cloud-based HR platform?", options: ["BambooHR", "Word", "PowerPoint"], answer: 0},
+                {question: "Which is a cloud-based customer support tool?", options: ["Zendesk", "Paint", "Calculator"], answer: 0},
+                {question: "Which is a cloud-based e-commerce platform?", options: ["Shopify", "Excel", "Notepad"], answer: 0},
+                {question: "Which is a cloud-based learning platform?", options: ["Moodle", "WordPad", "Paint"], answer: 0},
+                {question: "Which is a cloud-based video streaming service?", options: ["Netflix", "MS Paint", "Notepad"], answer: 0},
+                {question: "Which is a cloud-based music streaming service?", options: ["Spotify", "Word", "PowerPoint"], answer: 0},
+                {question: "Which is a cloud-based photo storage service?", options: ["Google Photos", "Excel", "Notepad"], answer: 0},
+                {question: "Which is a cloud-based document editor?", options: ["Google Docs", "Paint", "Calculator"], answer: 0},
+                {question: "Which is a cloud-based spreadsheet editor?", options: ["Google Sheets", "WordPad", "Paint"], answer: 0},
+                {question: "Which is a cloud-based presentation editor?", options: ["Google Slides", "Excel", "Notepad"], answer: 0},
+                {question: "Which is a cloud-based form builder?", options: ["Google Forms", "Word", "PowerPoint"], answer: 0},
+                {question: "Which is a cloud-based survey tool?", options: ["SurveyMonkey", "Excel", "Notepad"], answer: 0},
+                {question: "Which is a cloud-based password manager?", options: ["LastPass", "Paint", "Calculator"], answer: 0},
+                {question: "Which is a cloud-based design tool?", options: ["Canva", "WordPad", "Paint"], answer: 0},
+                {question: "Which is a cloud-based code repository?", options: ["GitHub", "Excel", "Notepad"], answer: 0},
+                {question: "Which is a cloud-based automation tool?", options: ["Zapier", "Word", "PowerPoint"], answer: 0},
+                {question: "Which is a cloud-based workflow tool?", options: ["Monday.com", "Excel", "Notepad"], answer: 0},
+                {question: "Which is a cloud-based video editor?", options: ["WeVideo", "Paint", "Calculator"], answer: 0},
+                {question: "Which is a cloud-based translation service?", options: ["Google Translate", "WordPad", "Paint"], answer: 0},
+                {question: "Which is a cloud-based map service?", options: ["Google Maps", "Excel", "Notepad"], answer: 0},
+                {question: "Which is a cloud-based weather service?", options: ["Met Office", "Word", "PowerPoint"], answer: 0},
+                {question: "Which is a cloud-based travel booking service?", options: ["Expedia", "Excel", "Notepad"], answer: 0},
+                {question: "Which is a cloud-based ticketing platform?", options: ["Eventbrite", "Paint", "Calculator"], answer: 0},
+                {question: "Which is a cloud-based messaging app?", options: ["Slack", "WordPad", "Paint"], answer: 0}
+            ],
+            Intermediate: [
+                {question: "Which AWS service is used for serverless computing?", options: ["Amazon EC2", "AWS Lambda", "Amazon S3"], answer: 1},
+                {question: "Which Azure service is used for hosting web apps?", options: ["Azure Functions", "Azure App Service", "Azure Blob Storage"], answer: 1},
+                {question: "What is the main benefit of auto-scaling?", options: ["Lower latency", "Automatic resource adjustment", "Cheaper storage"], answer: 1},
+                {question: "Which Google Cloud service is for machine learning?", options: ["BigQuery", "Cloud ML Engine", "Cloud SQL"], answer: 1},
+                {question: "What is a region in cloud terms?", options: ["A physical location", "A software version", "A network protocol"], answer: 0},
+                {question: "Which is a UK government cloud framework?", options: ["G-Cloud", "Azure", "AWS"], answer: 0},
+                {question: "What is a hybrid cloud?", options: ["Only public", "Only private", "Mix of public and private"], answer: 2},
+                {question: "Which service provides managed databases?", options: ["Amazon RDS", "Amazon S3", "AWS Lambda"], answer: 0},
+                {question: "What is cloud migration?", options: ["Moving to the cloud", "Changing passwords", "Buying hardware"], answer: 0},
+                {question: "Which is a cloud monitoring tool?", options: ["CloudWatch", "Excel", "Word"], answer: 0},
+                {question: "Which protocol is commonly used for secure file transfer in the cloud?", options: ["FTP", "SFTP", "HTTP"], answer: 1},
+                {question: "Which is a cloud-based database?", options: ["Amazon DynamoDB", "MS Paint", "Notepad"], answer: 0},
+                {question: "Which is a cloud-based analytics service?", options: ["Google BigQuery", "Excel", "Word"], answer: 0},
+                {question: "Which is a cloud-based messaging service?", options: ["Amazon SNS", "Paint", "Calculator"], answer: 0},
+                {question: "Which is a cloud-based queue service?", options: ["Amazon SQS", "WordPad", "Paint"], answer: 0},
+                {question: "Which is a cloud-based CDN?", options: ["CloudFront", "Excel", "Notepad"], answer: 0},
+                {question: "Which is a cloud-based DNS service?", options: ["Amazon Route 53", "Word", "PowerPoint"], answer: 0},
+                {question: "Which is a cloud-based load balancer?", options: ["Elastic Load Balancer", "Excel", "Notepad"], answer: 0},
+                {question: "Which is a cloud-based VPN service?", options: ["AWS VPN", "Paint", "Calculator"], answer: 0},
+                {question: "Which is a cloud-based firewall?", options: ["AWS WAF", "WordPad", "Paint"], answer: 0},
+                {question: "Which is a cloud-based security service?", options: ["AWS Shield", "Excel", "Notepad"], answer: 0},
+                {question: "Which is a cloud-based identity service?", options: ["AWS IAM", "Word", "PowerPoint"], answer: 0},
+                {question: "Which is a cloud-based monitoring service?", options: ["Azure Monitor", "Excel", "Notepad"], answer: 0},
+                {question: "Which is a cloud-based automation service?", options: ["AWS CloudFormation", "Paint", "Calculator"], answer: 0},
+                {question: "Which is a cloud-based orchestration service?", options: ["Kubernetes", "WordPad", "Paint"], answer: 0},
+                {question: "Which is a cloud-based container service?", options: ["Amazon ECS", "Excel", "Notepad"], answer: 0},
+                {question: "Which is a cloud-based serverless platform?", options: ["AWS Lambda", "Word", "PowerPoint"], answer: 0},
+                {question: "Which is a cloud-based function service?", options: ["Azure Functions", "Excel", "Notepad"], answer: 0},
+                {question: "Which is a cloud-based event service?", options: ["Amazon EventBridge", "Paint", "Calculator"], answer: 0},
+                {question: "Which is a cloud-based logging service?", options: ["AWS CloudWatch Logs", "WordPad", "Paint"], answer: 0},
+                {question: "Which is a cloud-based cost management tool?", options: ["AWS Cost Explorer", "Excel", "Notepad"], answer: 0},
+                {question: "Which is a cloud-based billing service?", options: ["AWS Billing", "Word", "PowerPoint"], answer: 0},
+                {question: "Which is a cloud-based compliance service?", options: ["AWS Artifact", "Excel", "Notepad"], answer: 0},
+                {question: "Which is a cloud-based migration service?", options: ["AWS Migration Hub", "Paint", "Calculator"], answer: 0},
+                {question: "Which is a cloud-based backup service?", options: ["AWS Backup", "WordPad", "Paint"], answer: 0},
+                {question: "Which is a cloud-based disaster recovery service?", options: ["AWS Elastic Disaster Recovery", "Excel", "Notepad"], answer: 0},
+                {question: "Which is a cloud-based encryption service?", options: ["AWS KMS", "Word", "PowerPoint"], answer: 0},
+                {question: "Which is a cloud-based key management service?", options: ["AWS KMS", "Excel", "Notepad"], answer: 0},
+                {question: "Which is a cloud-based certificate manager?", options: ["AWS Certificate Manager", "Paint", "Calculator"], answer: 0},
+                {question: "Which is a cloud-based secrets manager?", options: ["AWS Secrets Manager", "WordPad", "Paint"], answer: 0},
+                {question: "Which is a cloud-based monitoring dashboard?", options: ["AWS CloudWatch Dashboards", "Excel", "Notepad"], answer: 0},
+                {question: "Which is a cloud-based resource tagging service?", options: ["AWS Resource Groups", "Word", "PowerPoint"], answer: 0},
+                {question: "Which is a cloud-based policy management service?", options: ["AWS Organizations", "Excel", "Notepad"], answer: 0},
+                {question: "Which is a cloud-based access analyser?", options: ["IAM Access Analyzer", "Paint", "Calculator"], answer: 0},
+                {question: "Which is a cloud-based compliance dashboard?", options: ["AWS Security Hub", "WordPad", "Paint"], answer: 0},
+                {question: "Which is a cloud-based vulnerability scanner?", options: ["Amazon Inspector", "Excel", "Notepad"], answer: 0},
+                {question: "Which is a cloud-based threat detection service?", options: ["Amazon GuardDuty", "Word", "PowerPoint"], answer: 0}
+            ],
+            Advanced: [
+                {question: "Which AWS service provides DDoS protection?", options: ["AWS Shield", "Amazon GuardDuty", "AWS WAF"], answer: 0},
+                {question: "What is a VPC peering connection used for?", options: ["Connecting two VPCs", "Encrypting data", "Scaling resources"], answer: 0},
+                {question: "Which Google Cloud service is best for big data analytics?", options: ["Cloud SQL", "BigQuery", "App Engine"], answer: 1},
+                {question: "What is the purpose of IAM in cloud?", options: ["Identity and Access Management", "Image Analysis Module", "Internet Access Method"], answer: 0},
+                {question: "Which is a UK data protection law?", options: ["GDPR", "HIPAA", "FERPA"], answer: 0},
+                {question: "What is multi-tenancy in cloud?", options: ["Multiple users sharing resources", "Single user", "No users"], answer: 0},
+                {question: "Which service provides encryption at rest?", options: ["Amazon S3", "Amazon EC2", "Amazon Route 53"], answer: 0},
+                {question: "What is a cloud-native application?", options: ["Built for cloud", "Built for desktop", "Built for mobile"], answer: 0},
+                {question: "Which is a UK government security standard?", options: ["Cyber Essentials", "ISO 9001", "PCI DSS"], answer: 0},
+                {question: "What is a container in cloud?", options: ["A virtualised environment", "A physical box", "A network cable"], answer: 0},
+                {question: "Which AWS service is used for threat detection?", options: ["Amazon GuardDuty", "AWS Shield", "Amazon S3"], answer: 0},
+                {question: "Which Azure service is used for advanced analytics?", options: ["Azure Synapse Analytics", "Azure Blob Storage", "Azure Functions"], answer: 0},
+                {question: "What is the main purpose of a cloud load balancer?", options: ["Distribute traffic", "Encrypt data", "Store files"], answer: 0},
+                {question: "Which protocol is recommended for secure API communication?", options: ["HTTPS", "FTP", "SMTP"], answer: 0},
+                {question: "Which AWS service is used for compliance and auditing?", options: ["AWS CloudTrail", "Amazon EC2", "Amazon S3"], answer: 0},
+                {question: "Which is a cloud-based SIEM solution?", options: ["Azure Sentinel", "Excel", "Notepad"], answer: 0},
+                {question: "Which is a cloud-based vulnerability management tool?", options: ["Amazon Inspector", "Paint", "Calculator"], answer: 0},
+                {question: "Which is a cloud-based secrets management service?", options: ["AWS Secrets Manager", "WordPad", "Paint"], answer: 0},
+                {question: "Which is a cloud-based certificate management service?", options: ["AWS Certificate Manager", "Excel", "Notepad"], answer: 0},
+                {question: "Which is a cloud-based policy management service?", options: ["AWS Organizations", "Word", "PowerPoint"], answer: 0},
+                {question: "Which is a cloud-based resource tagging service?", options: ["AWS Resource Groups", "Excel", "Notepad"], answer: 0},
+                {question: "Which is a cloud-based compliance dashboard?", options: ["AWS Security Hub", "Paint", "Calculator"], answer: 0},
+                {question: "Which is a cloud-based access analyser?", options: ["IAM Access Analyzer", "WordPad", "Paint"], answer: 0},
+                {question: "Which is a cloud-based monitoring dashboard?", options: ["AWS CloudWatch Dashboards", "Excel", "Notepad"], answer: 0},
+                {question: "Which is a cloud-based cost management tool?", options: ["AWS Cost Explorer", "Word", "PowerPoint"], answer: 0},
+                {question: "Which is a cloud-based billing service?", options: ["AWS Billing", "Excel", "Notepad"], answer: 0},
+                {question: "Which is a cloud-based disaster recovery service?", options: ["AWS Elastic Disaster Recovery", "Paint", "Calculator"], answer: 0},
+                {question: "Which is a cloud-based backup service?", options: ["AWS Backup", "WordPad", "Paint"], answer: 0},
+                {question: "Which is a cloud-based migration service?", options: ["AWS Migration Hub", "Excel", "Notepad"], answer: 0},
+                {question: "Which is a cloud-based encryption service?", options: ["AWS KMS", "Word", "PowerPoint"], answer: 0},
+                {question: "Which is a cloud-based key management service?", options: ["AWS KMS", "Excel", "Notepad"], answer: 0},
+                {question: "Which is a cloud-based orchestration service?", options: ["Kubernetes", "Paint", "Calculator"], answer: 0},
+                {question: "Which is a cloud-based container service?", options: ["Amazon ECS", "WordPad", "Paint"], answer: 0},
+                {question: "Which is a cloud-based serverless platform?", options: ["AWS Lambda", "Excel", "Notepad"], answer: 0},
+                {question: "Which is a cloud-based function service?", options: ["Azure Functions", "Word", "PowerPoint"], answer: 0},
+                {question: "Which is a cloud-based event service?", options: ["Amazon EventBridge", "Excel", "Notepad"], answer: 0},
+                {question: "Which is a cloud-based logging service?", options: ["AWS CloudWatch Logs", "Paint", "Calculator"], answer: 0},
+                {question: "Which is a cloud-based monitoring service?", options: ["Azure Monitor", "WordPad", "Paint"], answer: 0},
+                {question: "Which is a cloud-based automation service?", options: ["AWS CloudFormation", "Excel", "Notepad"], answer: 0},
+                {question: "Which is a cloud-based analytics service?", options: ["Google BigQuery", "Word", "PowerPoint"], answer: 0},
+                {question: "Which is a cloud-based messaging service?", options: ["Amazon SNS", "Excel", "Notepad"], answer: 0},
+                {question: "Which is a cloud-based queue service?", options: ["Amazon SQS", "Paint", "Calculator"], answer: 0},
+                {question: "Which is a cloud-based CDN?", options: ["CloudFront", "WordPad", "Paint"], answer: 0},
+                {question: "Which is a cloud-based DNS service?", options: ["Amazon Route 53", "Excel", "Notepad"], answer: 0},
+                {question: "Which protocol is commonly used for secure file transfer in the cloud?", options: ["SFTP", "FTP", "HTTP"], answer: 0}
+            ]
+        };
+
+        let currentQuiz = [];
+        let currentDifficulty = '';
+        let currentQuestion = 0;
+        let score = 0;
+        let answers = [];
+        let selectedQuestions = [];
+
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function startQuiz(difficulty) {
+            currentDifficulty = difficulty;
+            // Randomly select 10 questions from the bank
+            selectedQuestions = shuffle([...quizzes[difficulty]]).slice(0, 10);
+            currentQuiz = selectedQuestions;
+            currentQuestion = 0;
+            score = 0;
+            answers = Array(currentQuiz.length).fill(null);
+            document.getElementById('quiz-selection').classList.add('hidden');
+            document.getElementById('quiz-interface').classList.remove('hidden');
+            document.getElementById('quiz-title').textContent = `${difficulty} Quiz`;
+            showQuestion();
+        }
+
+        function showQuestion() {
+            const q = currentQuiz[currentQuestion];
+            document.getElementById('question-number').textContent = currentQuestion + 1;
+            document.getElementById('progress-bar').style.width = `${((currentQuestion+1)/currentQuiz.length)*100}%`;
+            document.getElementById('question-text').textContent = q.question;
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = '';
+            q.options.forEach((opt, idx) => {
+                const optionDiv = document.createElement('div');
+                optionDiv.className = 'quiz-option rounded-lg';
+                optionDiv.innerHTML = `
+                    <input type=\"radio\" name=\"quiz_option\" id=\"option${idx}\" class=\"hidden\" ${answers[currentQuestion] === idx ? 'checked' : ''}>
+                    <label for=\"option${idx}\" class=\"block w-full text-left p-4 rounded-lg cursor-pointer\">${String.fromCharCode(65+idx)}) ${opt}</label>
+                `;
+                optionsContainer.appendChild(optionDiv);
+            });
+
+            // Navigation buttons
+            let navHtml = '';
+            navHtml += `<button class=\"btn-primary font-bold mr-4\" id=\"prev-btn\" ${currentQuestion === 0 ? 'disabled' : ''}>Previous</button>`;
+            navHtml += `<button class=\"btn-primary font-bold\" id=\"next-btn\">${currentQuestion === currentQuiz.length-1 ? 'Finish' : 'Next Question →'}</button>`;
+            document.getElementById('nav-buttons').innerHTML = navHtml;
+
+            document.getElementById('prev-btn').onclick = function() {
+                saveAnswer();
+                if (currentQuestion > 0) {
+                    currentQuestion--;
+                    showQuestion();
+                }
+            };
+            document.getElementById('next-btn').onclick = function() {
+                saveAnswer();
+                if (answers[currentQuestion] === null) {
+                    alert('Please select an option.');
+                    return;
+                }
+                if (currentQuestion < currentQuiz.length-1) {
+                    currentQuestion++;
+                    showQuestion();
+                } else {
+                    showResult();
+                }
+            };
+        }
+
+        function saveAnswer() {
+            const radios = document.getElementsByName('quiz_option');
+            radios.forEach((r, idx) => {
+                if (r.checked) answers[currentQuestion] = idx;
+            });
+        }
+
+        function showResult() {
+            score = answers.reduce((acc, val, idx) => acc + (val === currentQuiz[idx].answer ? 1 : 0), 0);
+            let resultHtml = `<div class=\"bg-white p-8 rounded-xl shadow-lg border\" style=\"border-color: var(--border-color);\">`;
+            resultHtml += `<h2 class=\"text-2xl font-bold mb-4\" style=\"color: var(--brand-primary);\">${currentDifficulty} Quiz Complete!</h2>`;
+            resultHtml += `<p class=\"text-xl mb-6\">Your Score: <span class=\"font-bold\">${score} / ${currentQuiz.length}</span></p>`;
+            resultHtml += `<h3 class=\"text-lg font-semibold mb-2\">Your Answers:</h3>`;
+            resultHtml += `<ul class=\"mb-6\">`;
+            currentQuiz.forEach((q, idx) => {
+                const correct = answers[idx] === q.answer;
+                const userAnswer = answers[idx] !== null ? q.options[answers[idx]] : "No answer";
+                resultHtml += `<li class=\"mb-2\"><span class=\"font-bold\">Q${idx+1}:</span> ${q.question}<br>`;
+                resultHtml += `<span class=\"${correct ? 'text-green-600' : 'text-red-600'}\">${correct ? 'Correct' : 'Incorrect'}</span> | `;
+                resultHtml += `Your answer: <span class=\"font-semibold\">${userAnswer}</span> | `;
+                resultHtml += `Correct answer: <span class=\"font-semibold\">${q.options[q.answer]}</span></li>`;
+            });
+            resultHtml += `</ul>`;
+            resultHtml += `<button class=\"btn-primary font-bold\" onclick=\"location.reload()\">Try Another Quiz</button>`;
+            resultHtml += `</div>`;
+            document.getElementById('quiz-interface').innerHTML = resultHtml;
+        }
+    </script>
+</body>
+</html>

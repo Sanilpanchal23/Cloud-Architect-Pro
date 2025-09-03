@@ -1,0 +1,1486 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloud Architect Pro - Visualiser</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --brand-primary: #6B46C1; /* A rich, deep purple */
+            --brand-primary-light: #805AD5;
+            --brand-primary-dark: #553C9A;
+            --brand-secondary: #48BB78; /* A vibrant green for success/accents */
+            --brand-secondary-dark: #38A169;
+            
+            --background-light: #F7FAFC; /* Light grey for main background */
+            --background-medium: #EDF2F7; /* Slightly darker grey for canvas */
+            --background-dark: #2D3748; /* Dark grey for deep elements or text */
+            
+            --text-primary: #2D3748; /* Dark grey for main text */
+            --text-secondary: #4A5568; /* Medium grey for secondary text */
+            --text-light: #E2E8F0; /* Light grey for text on dark backgrounds */
+            
+            --border-color: #CBD5E0; /* Light grey for borders */
+            --shadow-light: rgba(0, 0, 0, 0.05);
+            --shadow-medium: rgba(0, 0, 0, 0.1);
+        }
+        
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--background-light); 
+            overflow: hidden;
+            color: var(--text-primary);
+        }
+        
+        /* --- Loader --- */
+        #loader { 
+            position: fixed; 
+            width: 100%; 
+            height: 100%; 
+            top: 0; 
+            left: 0; 
+            background: linear-gradient(135deg, var(--background-dark) 0%, #4A5568 100%); 
+            z-index: 9999; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            flex-direction: column; 
+            transition: opacity 0.5s ease, visibility 0.5s ease; 
+        }
+        #loader.hidden { opacity: 0; visibility: hidden; }
+        .spinner { 
+            border: 4px solid rgba(255, 255, 255, 0.2); 
+            border-left-color: var(--brand-primary-light); 
+            border-radius: 50%; 
+            width: 50px; 
+            height: 50px; 
+            animation: spin 1s linear infinite; 
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        /* --- Layout --- */
+        #main-container { 
+            display: grid; 
+            grid-template-columns: 300px 1fr; 
+            transition: grid-template-columns 0.3s ease; 
+        }
+        #main-container.palette-hidden { grid-template-columns: 0px 1fr; }
+        #main-container.info-visible { grid-template-columns: 300px 1fr 320px; }
+        #main-container.palette-hidden.info-visible { grid-template-columns: 0px 1fr 320px; }
+        #palette, #info-panel { 
+            transition: all 0.3s ease; 
+            overflow: hidden; 
+        }
+        #palette.hidden, #info-panel.hidden { 
+            width: 0; 
+            padding: 0; 
+            opacity: 0; 
+            border: none; 
+        }
+        
+        /* --- Navigation --- */
+        nav {
+            background: white;
+            box-shadow: 0 2px 4px -1px var(--shadow-light);
+            border-bottom: 1px solid var(--border-color);
+        }
+        nav .brand-logo { color: var(--brand-primary); }
+        nav a.active { background-color: var(--brand-primary); color: white; }
+        nav a:hover:not(.active) { background-color: var(--background-medium); color: var(--text-primary); }
+        
+        /* --- Toolbar --- */
+        .toolbar {
+            background: var(--background-light);
+            box-shadow: 0 2px 10px var(--shadow-light);
+            border-bottom: 1px solid var(--border-color);
+        }
+        .toolbar input {
+            border-color: var(--border-color);
+            background-color: white;
+            color: var(--text-primary);
+        }
+        .toolbar input:focus {
+            ring-color: var(--brand-primary);
+        }
+        
+        /* --- Buttons --- */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            font-weight: 500;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            border: none;
+            outline: none;
+        }
+        .btn-primary {
+            background-color: var(--brand-primary);
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: var(--brand-primary-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px -1px rgba(107, 70, 193, 0.3);
+        }
+        .btn-secondary {
+            background-color: var(--text-secondary);
+            color: white;
+        }
+        .btn-secondary:hover {
+            background-color: #2D3748;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px -1px rgba(74, 85, 104, 0.3);
+        }
+        .btn-success {
+            background-color: var(--brand-secondary);
+            color: white;
+        }
+        .btn-success:hover {
+            background-color: var(--brand-secondary-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px -1px rgba(72, 187, 120, 0.3);
+        }
+        .btn-danger {
+            background-color: #E53E3E; /* Red */
+            color: white;
+        }
+        .btn-danger:hover {
+            background-color: #C53030;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px -1px rgba(229, 62, 62, 0.3);
+        }
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+        .btn-outline:hover {
+            background-color: var(--background-medium);
+            border-color: var(--text-secondary);
+        }
+        
+        /* --- Palette & Canvas --- */
+        .service-icon { 
+            cursor: grab; 
+            transition: all 0.2s ease; 
+            border-radius: 0.5rem;
+            position: relative;
+            background-color: white;
+        }
+        .service-icon:hover { 
+            background-color: var(--background-medium);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px var(--shadow-medium);
+        }
+        .service-icon:active {
+            cursor: grabbing;
+        }
+        #canvas-container { 
+            background-color: var(--background-medium); 
+            cursor: grab; 
+            position: relative;
+        }
+        #canvas-container.panning { cursor: grabbing; }
+        #canvas { 
+            background-image: radial-gradient(var(--border-color) 1px, transparent 1px); 
+            background-size: 20px 20px; 
+            position: relative; 
+            transform-origin: top left; 
+            transition: transform 0.1s linear; 
+        }
+        #canvas-title { 
+            position: absolute; 
+            top: 20px; 
+            left: 20px; 
+            background-color: rgba(255,255,255,0.95); 
+            padding: 10px 18px; 
+            border-radius: 8px; 
+            font-weight: 600; 
+            color: var(--text-primary); 
+            box-shadow: 0 4px 6px -1px var(--shadow-medium); 
+            transition: opacity 0.3s ease; 
+            opacity: 0; 
+            pointer-events: none; 
+            z-index: 10;
+            -webkit-backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            backdrop-filter: blur(5px);
+            border: 1px solid var(--border-color);
+        }
+        #canvas-title.visible { opacity: 1; }
+        .canvas-icon { 
+            position: absolute; 
+            cursor: move; 
+            width: 90px; 
+            height: 90px; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center; 
+            background: linear-gradient(145deg, #ffffff, var(--background-light));
+            border-radius: 0.75rem; 
+            box-shadow: 0 4px 6px -1px var(--shadow-medium), 0 2px 4px -1px var(--shadow-light); 
+            transition: all 0.2s ease; 
+            border: 2px solid transparent; 
+            padding: 8px; 
+            z-index: 5;
+        }
+        .canvas-icon:hover {
+            box-shadow: 0 10px 15px -3px var(--shadow-medium), 0 4px 6px -2px var(--shadow-light);
+            transform: translateY(-2px);
+            z-index: 6;
+        }
+        .canvas-icon.selected { 
+            border-color: var(--brand-primary); 
+            box-shadow: 0 0 0 3px rgba(107, 70, 193, 0.2), 0 10px 15px -3px var(--shadow-medium);
+        }
+        .canvas-icon svg { 
+            pointer-events: none; 
+            width: 40px; 
+            height: 40px; 
+        }
+        .canvas-icon span { 
+            pointer-events: none; 
+            font-size: 11px; 
+            text-align: center; 
+            margin-top: 6px; 
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+        
+        /* --- Tooltips --- */
+        .tooltip { 
+            position: fixed; 
+            background-color: var(--background-dark); 
+            color: var(--text-light); 
+            padding: 12px; 
+            border-radius: 8px; 
+            font-size: 12px; 
+            white-space: normal; 
+            width: 240px; 
+            text-align: left; 
+            opacity: 0; 
+            visibility: hidden; 
+            transition: opacity 0.2s ease; 
+            pointer-events: none; 
+            z-index: 10000; 
+            box-shadow: 0 10px 15px -3px var(--shadow-medium);
+            line-height: 1.5;
+        }
+        .tooltip strong { 
+            color: #90CDF4; /* A light blue for emphasis */
+            display: block; 
+            margin-bottom: 6px; 
+            font-size: 13px;
+        }
+        .service-icon:hover .tooltip { 
+            opacity: 1; 
+            visibility: visible; 
+        }
+        .tooltip-canvas { 
+            position: absolute; 
+            top: 100%; 
+            left: 50%; 
+            transform: translateX(-50%); 
+            margin-top: 10px; 
+            /* Inherits tooltip styles but makes it non-fixed */
+            position: absolute;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s ease;
+        }
+        .canvas-icon:hover .tooltip-canvas {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        /* --- Connectors --- */
+        .connector-handle { 
+            position: absolute; 
+            top: 50%; 
+            right: -6px; 
+            transform: translateY(-50%); 
+            width: 12px; 
+            height: 12px; 
+            background-color: var(--brand-primary); 
+            border-radius: 50%; 
+            cursor: crosshair; 
+            display: none; 
+            z-index: 15; 
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.9);
+            transition: all 0.2s ease;
+        }
+        .connector-handle:hover {
+            transform: translateY(-50%) scale(1.2);
+            background-color: var(--brand-primary-dark);
+        }
+        .canvas-icon:hover .connector-handle { display: block; }
+        #connector-svg { 
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            pointer-events: none; 
+            transform-origin: top left; 
+            transition: transform 0.1s linear; 
+        }
+        .connector-line { stroke: var(--text-secondary); }
+        .connector-line-temp { stroke: var(--brand-primary); }
+        
+        /* --- Sidebars --- */
+        .sidebar {
+            background: linear-gradient(to bottom, #ffffff, var(--background-light));
+            box-shadow: 0 0 15px var(--shadow-light);
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid var(--border-color); /* Added border for palette */
+        }
+        #info-panel.sidebar { /* Info panel has left border */
+            border-right: none;
+            border-left: 1px solid var(--border-color);
+        }
+        .sidebar-header {
+            background: var(--background-light);
+            border-bottom: 1px solid var(--border-color);
+            flex-shrink: 0;
+            color: var(--text-primary);
+        }
+        .sidebar-content { 
+            flex: 1; 
+            overflow-y: auto; 
+            padding: 1rem;
+        }
+        .sidebar-content::-webkit-scrollbar { width: 6px; } 
+        .sidebar-content::-webkit-scrollbar-track { background: var(--background-light); } 
+        .sidebar-content::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 3px; } 
+        .sidebar-content::-webkit-scrollbar-thumb:hover { background: var(--text-secondary); }
+        
+        /* --- Info Panel --- */
+        .info-card {
+            background-color: white;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            box-shadow: 0 1px 3px var(--shadow-light);
+            border: 1px solid var(--border-color);
+        }
+        .info-card h4 {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+        .info-card ul {
+            list-style-type: disc;
+            padding-left: 1.25rem;
+        }
+        .info-card li {
+            margin-bottom: 0.25rem;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+        
+        /* --- Zoom Controls --- */
+        #zoom-controls {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(5px);
+            box-shadow: 0 4px 12px var(--shadow-medium);
+            border: 1px solid var(--border-color);
+        }
+        .zoom-btn {
+            transition: all 0.2s ease;
+            color: var(--text-secondary);
+        }
+        .zoom-btn:hover {
+            background-color: var(--background-medium);
+            transform: scale(1.1);
+        }
+        
+        /* --- Modals --- */
+        .modal-overlay {
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            transition: all 0.3s ease;
+        }
+        .modal {
+            background: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            transform: scale(0.95);
+            transition: transform 0.3s ease;
+            color: var(--text-primary);
+        }
+        .modal.show {
+            transform: scale(1);
+        }
+        .template-card {
+            transition: all 0.2s ease;
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            overflow: hidden;
+            background-color: white;
+        }
+        .template-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 15px -3px var(--shadow-medium);
+            border-color: var(--brand-primary-light);
+        }
+        
+        /* --- Notifications --- */
+        .notification {
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            transform: translateY(100px);
+            opacity: 0;
+        }
+        .notification.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        /* --- Animation Classes --- */
+        .fade-in {
+            animation: fadeIn 0.3s ease forwards;
+        }
+        .slide-in-left {
+            animation: slideInLeft 0.3s ease forwards;
+        }
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideInLeft {
+            from { transform: translateX(-20px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(107, 70, 193, 0.4); } /* Using brand-primary for pulse */
+            70% { box-shadow: 0 0 0 10px rgba(107, 70, 193, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(107, 70, 193, 0); }
+        }
+        
+        /* --- Responsive Design --- */
+        @media (max-width: 1024px) {
+            #main-container { grid-template-columns: 250px 1fr; }
+            #main-container.info-visible { grid-template-columns: 250px 1fr 280px; }
+            #main-container.palette-hidden.info-visible { grid-template-columns: 0px 1fr 280px; }
+        }
+        
+        @media (max-width: 768px) {
+            #main-container { grid-template-columns: 1fr; }
+            #main-container.info-visible { grid-template-columns: 1fr; }
+            #palette, #info-panel {
+                position: fixed;
+                top: 0;
+                bottom: 0;
+                z-index: 40;
+                width: 300px;
+                max-width: 85vw;
+                opacity: 1;
+                box-shadow: 0 0 20px var(--shadow-medium);
+            }
+            #palette { left: 0; transform: translateX(-100%); border-right: 1px solid var(--border-color); }
+            #palette.show { transform: translateX(0); }
+            #info-panel { right: 0; transform: translateX(100%); border-left: 1px solid var(--border-color); }
+            #info-panel.show { transform: translateX(0); }
+
+            .mobile-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 35;
+                display: none;
+            }
+            .mobile-overlay.show {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body class="flex flex-col h-screen">
+
+    <div id="loader" class="flex flex-col items-center justify-center">
+        <div class="spinner"></div>
+        <h1 class="text-2xl font-bold text-white mt-6">Cloud Architect Pro</h1>
+        <p class="text-gray-300 mt-2">Visualising the Cloud</p>
+        <div class="mt-8 w-64 h-2 bg-gray-700 rounded-full overflow-hidden">
+            <div id="loader-progress" class="h-full" style="width: 0%; background-color: var(--brand-primary-light);"></div>
+        </div>
+    </div>
+
+
+    <nav class="z-30">
+        <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <svg class="h-8 w-8 brand-logo" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/>
+                    </svg>
+                    <span class="font-bold text-xl ml-2 text-gray-800">Cloud Architect Pro</span>
+                </div>
+                
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="index.html" class="active px-3 py-2 rounded-md text-sm font-medium">Visualiser</a>
+                        <a href="learn.html" class="text-gray-500 px-3 py-2 rounded-md text-sm font-medium">Learn</a>
+                        <a href="quiz.html" class="text-gray-500 px-3 py-2 rounded-md text-sm font-medium">Quiz</a>
+                        <a href="resources.html" class="text-gray-500 px-3 py-2 rounded-md text-sm font-medium">Resources</a>
+                    </div>
+                </div>
+                
+                <div class="md:hidden">
+                    <button id="mobile-menu-btn" class="p-2 rounded-md text-gray-500 hover:text-gray-700 focus:outline-none">
+                        <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="toolbar p-3 z-20 flex items-center justify-center flex-wrap gap-3">
+        <div class="flex items-center gap-3 flex-wrap justify-center">
+            <div class="flex items-center gap-2">
+                <label for="project-name" class="text-sm font-semibold text-gray-600">Project Name:</label>
+                <input type="text" id="project-name" value="My-Cloud-Project" class="p-2 border rounded-md text-sm focus:ring-2 w-40">
+            </div>
+            
+            <div class="flex items-center gap-2">
+                <button id="save-btn" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Save
+                </button>
+                <button id="load-btn" class="btn btn-secondary">
+                    <i class="fas fa-folder-open"></i> Load
+                </button>
+                <button id="template-btn" class="btn btn-primary" style="background-color: var(--brand-primary-light);">
+                    <i class="fas fa-layer-group"></i> Templates
+                </button>
+                <button id="clear-btn" class="btn btn-danger">
+                    <i class="fas fa-trash"></i> Clear
+                </button>
+            </div>
+        </div>
+        
+        <div class="flex items-center gap-2 md:hidden">
+            <button id="mobile-palette-btn" class="btn btn-outline">
+                <i class="fas fa-th"></i> Services
+            </button>
+            <button id="mobile-info-btn" class="btn btn-outline">
+                <i class="fas fa-info-circle"></i> Details
+            </button>
+        </div>
+        
+        <input type="file" id="file-input" class="hidden" accept=".json">
+    </div>
+
+    <main id="main-container" class="flex-grow overflow-hidden p-6">
+        <aside id="palette" class="sidebar">
+            <div class="sidebar-header p-4 flex justify-between items-center">
+                <div>
+                    <h2 class="text-lg font-semibold">Cloud Services</h2>
+                    <p class="text-sm text-secondary">Drag to canvas or click for more info.</p>
+                </div>
+            </div>
+            <div class="sidebar-content">
+            </div>
+        </aside>
+
+        <div id="canvas-container" class="flex-grow relative">
+            <svg id="connector-svg" class="w-full h-full absolute top-0 left-0"></svg>
+            <div id="canvas-title"></div>
+            <div id="canvas" class="w-full h-full">
+                <div id="canvas-placeholder" class="absolute inset-0 flex items-center justify-center text-slate-400 pointer-events-none text-center p-4">
+                    <div class="max-w-md">
+                        <i class="fas fa-cloud text-5xl mb-4 opacity-50"></i>
+                        <h3 class="text-xl font-semibold mb-2">Your Cloud Architecture Canvas</h3>
+                        <p>Drag services from the palette, or load a template to begin designing!</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="zoom-controls" class="absolute bottom-4 right-4 flex items-center gap-1 p-1 rounded-full z-20">
+                <button id="zoom-out-btn" class="zoom-btn w-8 h-8 flex items-center justify-center rounded-full font-bold">-</button>
+                <span id="zoom-level" class="text-sm font-semibold w-12 text-center">100%</span>
+                <button id="zoom-in-btn" class="zoom-btn w-8 h-8 flex items-center justify-center rounded-full font-bold">+</button>
+                <button id="zoom-reset-btn" class="zoom-btn w-8 h-8 flex items-center justify-center rounded-full" title="Reset View">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 2v6h6"/><path d="M21 12A9 9 0 0 0 6 5.3L3 8"/><path d="M21 22v-6h-6"/><path d="M3 12a9 9 0 0 0 15 6.7l3-2.7"/>
+                    </svg>
+                </button>
+            </div>
+            
+            <div id="canvas-controls" class="absolute top-4 right-4 flex flex-col gap-2 z-20">
+                <button id="center-content-btn" class="btn btn-outline w-10 h-10 p-0 flex items-center justify-center bg-white" title="Centre Content">
+                    <i class="fas fa-crosshairs"></i>
+                </button>
+                <button id="toggle-grid-btn" class="btn btn-outline w-10 h-10 p-0 flex items-center justify-center bg-white" title="Toggle Grid">
+                    <i class="fas fa-th"></i>
+                </button>
+            </div>
+        </div>
+        
+        <aside id="info-panel" class="sidebar hidden">
+            <div class="sidebar-header p-4 flex justify-between items-center">
+                <h3 id="info-title" class="text-lg font-semibold">Service Details</h3>
+                <button id="info-close-btn" class="text-2xl hover:text-text-primary">&times;</button>
+            </div>
+            <div id="info-panel-content" class="sidebar-content text-sm space-y-4">
+            </div>
+        </aside>
+        
+        <div id="mobile-overlay" class="mobile-overlay"></div>
+    </main>
+    
+    <div id="template-modal" class="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4 hidden opacity-0 invisible">
+        <div class="modal w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+            <div class="flex justify-between items-center border-b p-6">
+                <h3 class="text-xl font-semibold">Architecture Templates</h3>
+                <button id="close-modal-btn" class="text-2xl hover:text-text-primary">&times;</button>
+            </div>
+            <div class="p-6 overflow-y-auto flex-1">
+                <p class="mb-6">Select a common architecture pattern to load it onto the canvas. This is a great way to learn!</p>
+                <div id="template-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+            </div>
+            <div class="border-t p-4 flex justify-end bg-slate-50">
+                <button id="cancel-modal-btn" class="btn btn-outline mr-2 bg-white">Cancel</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="notification" class="notification fixed bottom-5 left-1/2 -translate-x-1/2 px-6 py-3 rounded-lg font-semibold z-50"></div>
+    
+
+    <div class="tooltip" id="dynamic-tooltip"></div>
+
+    <footer class="w-full bg-white border-t border-gray-200 py-4 px-6 text-center text-sm text-gray-500">
+        &copy; 2025 Cloud Architect Pro. All rights reserved.
+    </footer>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Simulate loading progress
+        const simulateLoading = () => {
+            const loaderProgress = document.getElementById('loader-progress');
+            let width = 0;
+            const interval = setInterval(() => {
+                width += Math.random() * 10;
+                if (width >= 100) {
+                    width = 100;
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        document.getElementById('loader').classList.add('hidden');
+                    }, 300);
+                }
+                loaderProgress.style.width = `${width}%`;
+            }, 100);
+        };
+        
+        simulateLoading();
+
+        const ICONS = {
+            compute: `<svg viewBox="0 0 24 24"><path fill="currentColor" d="M4 18h16v-2H4v2zm0-5h16v-2H4v2zm0-5h16V6H4v2z"/></svg>`,
+            lambda: `<svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 2L2 8.5V15.5L12 22L22 15.5V8.5L12 2ZM4 9.87L12 5.12L20 9.87V14.13L12 18.88L4 14.13V9.87Z"/></svg>`,
+            storage: `<svg viewBox="0 0 24 24"><path fill="currentColor" d="M4 2h16c1.1 0 2 .9 2 2v16c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2zm0 4v4h16V6H4zm0 6v4h16v-4H4z"/></svg>`,
+            database: `<svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 3c-4.42 0-8 1.79-8 4v10c0 2.21 3.58 4 8 4s8-1.79 8-4V7c0-2.21-3.58-4-8-4zm0 2c3.31 0 6 1.34 6 3s-2.69 3-6 3s-6-1.34-6-3s2.69-3 6-3zm0 14c-3.31 0-6-1.34-6-3v-1.57c1.11.33 2.5.57 4 .57s2.89-.24 4-.57V17c0 1.66-2.69 3-6 3z"/></svg>`,
+            networking: `<svg viewBox="0 0 24 24"><path fill="currentColor" d="M21 9h-2V7h2v2zm-4 0h-2V7h2v2zm-4 0H9V7h2v2zm-4 0H5V7h2v2zm12 8h2v-2h-2v2zm-4 0h2v-2h-2v2zm-4 0h2v-2h-2v2zm-4 0h2v-2H5v2zM3 5v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2z"/></svg>`,
+            elb: `<svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 16v-4H6v-4h5V6l5 5-5 5z"/></svg>`,
+            dynamodb: `<svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>`
+        };
+
+        const CLOUD_SERVICES = {
+            "AWS": {
+                color: "#FF9900",
+                bgColor: "#FFF5E6",
+                logo: `<svg width="24" height="24" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg"><g><text x="50" y="150" font-family="Arial, Helvetica, sans-serif" font-size="120" fill="#232F3E" font-weight="bold">AWS</text><path d="M100 220 Q200 300 300 220" stroke="#FF9900" stroke-width="16" fill="none"/><path d="M280 220 Q285 230 295 220" stroke="#FF9900" stroke-width="8" fill="none"/></g></svg>`,
+                services: {
+                    Compute: [
+                        { id: "aws-ec2", name: "EC2", icon: "compute", desc: "Provides resizable virtual servers, known as instances, for running your applications.", useCase: "Hosting web applications, running batch processing, or managing continuous integration/delivery workloads.", features: ["Wide range of instance types", "Scalable and flexible capacity", "Integrates with other AWS services for security and networking"] },
+                        { id: "aws-lambda", name: "Lambda", icon: "lambda", desc: "A serverless compute service that runs your code in response to events without provisioning or managing servers.", useCase: "Processing data, running backend APIs, creating event-driven applications, or building chatbots.", features: ["Automatic scaling and high availability", "Pay-per-execution model, no idle costs", "Supports various programming languages and runtime environments"] }
+                    ],
+                    Storage: [ 
+                        { id: "aws-s3", name: "S3", icon: "storage", desc: "Highly scalable, durable, and secure object storage for a wide variety of data.", useCase: "Storing static website assets, backups, data for analytics, or large media files.", features: ["Industry-leading durability (11 nines)", "Flexible storage classes (Standard, Infrequent Access, Glacier)", "Robust security features, including encryption and access control"] } 
+                    ],
+                    Database: [ 
+                        { id: "aws-rds", name: "RDS", icon: "database", desc: "A managed relational database service that makes it easy to set up, operate, and scale a relational database.", useCase: "Powering transactional applications, e-commerce platforms, or content management systems.", features: ["Supports popular database engines (MySQL, PostgreSQL, SQL Server, Oracle)", "Automated backups and point-in-time recovery", "High availability with Multi-AZ deployments and read replicas"] },
+                        { id: "aws-dynamodb", name: "DynamoDB", icon: "dynamodb", desc: "A fast and flexible NoSQL database service for applications requiring single-digit millisecond performance at any scale.", useCase: "Building gaming applications, real-time bidding systems, or highly concurrent mobile and web apps.", features: ["Seamless scalability and high performance", "Fully managed and highly available", "Supports document and key-value data models"] }
+                    ],
+                    Networking: [ 
+                        { id: "aws-vpc", name: "VPC", icon: "networking", desc: "Enables you to launch AWS resources into a logically isolated virtual network that you define.", useCase: "Creating custom network configurations, isolating sensitive data, or connecting your on-premise network to AWS.", features: ["Custom IP address ranges, subnets, and route tables", "Enhanced security with network access control lists (NACLs) and security groups", "VPN connectivity and direct connect options"] },
+                        { id: "aws-elb", name: "ELB", icon: "elb", desc: "Automatically distributes incoming application traffic across multiple targets, such as EC2 instances, in multiple Availability Zones.", useCase: "Ensuring high availability and fault tolerance for your applications, and scaling to meet demand.", features: ["Supports Application Load Balancers, Network Load Balancers, and Gateway Load Balancers", "Health checks to monitor instance health", "SSL/TLS termination for secure connections"] }
+                    ]
+                }
+            },
+            "Azure": {
+                color: "#0078D4",
+                bgColor: "#E6F2FA",
+                logo: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12.48 2.58a.4.4 0 00-.48-.01L4.23 7.82a.4.4 0 00-.23.36v7.64c0 .15.08.29.23.36l7.77 5.25a.4.4 0 00.48-.01l7.77-5.25a.4.4 0 00.23-.36V8.18a.4.4 0 00-.23-.36l-7.77-5.25zM12 11.25L5 7l7-4.75 7 4.75-7 4.25z" fill="#0078D4"/></svg>`,
+                services: {
+                    Compute: [
+                        { id: "azure-vm", name: "VMs", icon: "compute", desc: "Provides on-demand, scalable computing power for running Windows or Linux virtual machines.", useCase: "Hosting enterprise applications, migrating on-premise workloads, or for development and testing environments.", features: ["Wide choice of operating systems and software", "VM Scale Sets for automated scaling", "Hybrid benefits for cost savings with existing licenses"] },
+                        { id: "azure-functions", name: "Functions", icon: "lambda", desc: "A serverless compute service that enables you to run small pieces of code ('functions') without managing infrastructure.", useCase: "Building event-driven architectures, processing data streams, or creating lightweight APIs.", features: ["Supports various languages, including C#, JavaScript, Python", "Pay-per-execution billing model", "Integrates with a wide range of Azure services for triggers and bindings"] }
+                    ],
+                    Storage: [ 
+                        { id: "azure-blob", name: "Blob Storage", icon: "storage", desc: "Microsoft's object storage solution for the cloud, designed for storing massive amounts of unstructured data.", useCase: "Serving images or videos, storing backups, creating data lakes for analytics, or hosting static websites.", features: ["Hot, Cool, and Archive access tiers for cost optimisation", "Geo-redundant storage options for disaster recovery", "Comprehensive security features including encryption and access control"] } 
+                    ],
+                    Database: [ 
+                        { id: "azure-sql", name: "SQL DB", icon: "database", desc: "A fully managed relational database service based on the latest stable version of Microsoft SQL Server.", useCase: "Building cloud-native applications, migrating existing SQL Server databases, or for business intelligence workloads.", features: ["Intelligent performance tuning and threat detection", "Built-in high availability and disaster recovery", "Serverless and provisioned compute tiers to match workload needs"] } 
+                    ]
+                }
+            },
+            "GCP": {
+                color: "#4285F4",
+                bgColor: "#E9F2FF",
+                logo: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>`,
+                services: {
+                    Compute: [
+                        { id: "gcp-compute", name: "Compute", icon: "compute", desc: "Provides scalable virtual machines running on Google's global infrastructure.", useCase: "Running high-performance computing (HPC) workloads, web servers, or large-scale data processing.", features: ["Custom machine types for tailored performance", "Live migration for zero downtime maintenance", "Per-second billing for cost efficiency"] },
+                        { id: "gcp-functions", name: "Functions", icon: "lambda", desc: "A serverless execution environment for building and connecting cloud services with event-driven code.", useCase: "Automating cloud operations, building webhooks, or processing data from other GCP services.", features: ["Automatically scales to meet demand", "Pay only for the compute time you consume", "Integrates seamlessly with Google Cloud's ecosystem"] }
+                    ],
+                    Storage: [ 
+                        { id: "gcp-storage", name: "Storage", icon: "storage", desc: "Unified object storage for various data types, offering durability and high availability.", useCase: "Storing user-generated content, backups, archive data, or hosting static websites.", features: ["Multiple storage classes (Standard, Nearline, Coldline, Archive) for cost optimisation", "Object Lifecycle Management for automated data transitions", "Global availability with multi-regional and dual-regional options"] } 
+                    ],
+                    Database: [ 
+                        { id: "gcp-sql", name: "Cloud SQL", icon: "database", desc: "A fully managed relational database service for MySQL, PostgreSQL, and SQL Server.", useCase: "Running web applications, CRM systems, or e-commerce platforms requiring a relational database.", features: ["Automated backups, replication, and patching", "High availability and disaster recovery options", "Built-in security and network isolation"] } 
+                    ]
+                }
+            }
+        };
+
+        const architectureTemplates = {
+            "static-website": { 
+                title: "Static Website Hosting", 
+                description: "A straightforward and cost-effective setup for a website that serves static content, without any server-side processing.", 
+                icons: [ { serviceId: "aws-s3", x: 350, y: 150 } ], 
+                connections: [] 
+            },
+            "web-app": { 
+                title: "Simple Web Application", 
+                description: "A classic two-tier architecture designed for a dynamic web application, separating web servers from the database.", 
+                icons: [ { serviceId: "aws-ec2", x: 250, y: 200 }, { serviceId: "aws-rds", x: 550, y: 200 } ], 
+                connections: [ { from: 0, to: 1 } ] 
+            },
+            "scalable-web-app": { 
+                title: "Scalable Web App", 
+                description: "A highly available and fault-tolerant web application setup, using a load balancer to distribute traffic across multiple servers.", 
+                icons: [ 
+                    { serviceId: "aws-elb", x: 150, y: 200 }, 
+                    { serviceId: "aws-ec2", x: 400, y: 125 }, 
+                    { serviceId: "aws-ec2", x: 400, y: 275 }, 
+                    { serviceId: "aws-rds", x: 650, y: 200}
+                ], 
+                connections: [ 
+                    {from: 0, to: 1}, 
+                    {from: 0, to: 2}, 
+                    {from: 1, to: 3}, 
+                    {from: 2, to: 3}
+                ] 
+            },
+            "serverless-api": { 
+                title: "Serverless API", 
+                description: "A cost-efficient and automatically scaling API backend, built entirely using serverless components.", 
+                icons: [ { serviceId: "aws-lambda", x: 350, y: 200 }, { serviceId: "aws-dynamodb", x: 600, y: 200 } ], 
+                connections: [ { from: 0, to: 1 } ] 
+            },
+            "private-network": { 
+                title: "Secure Virtual Private Cloud (VPC)", 
+                description: "An isolated and secure network environment for deploying sensitive applications, featuring both public and private resources.", 
+                icons: [ { serviceId: "aws-vpc", x: 400, y: 200}, { serviceId: "aws-ec2", x: 250, y: 150}, { serviceId: "aws-rds", x: 550, y: 250} ], 
+                connections: [ { from: 1, to: 2} ] 
+            },
+            "event-driven": { 
+                title: "Event-Driven Processing", 
+                description: "A system designed to process events in real-time, often using a serverless function triggered by a queue or data stream.", 
+                icons: [ { serviceId: "azure-functions", x: 450, y: 150 }, { serviceId: "azure-blob", x: 200, y: 150 } ], 
+                connections: [ { from: 1, to: 0 } ] 
+            }
+        };
+
+        // --- State, Selectors, and Init ---
+        let state = { icons: {}, connections: [], selectedIconId: null, isConnecting: false, connectionStartId: null };
+        let transformState = { x: 0, y: 0, scale: 1 };
+        let panState = { isPanning: false, startX: 0, startY: 0 };
+        let dragInfo = {};
+        let nextId = 0;
+        let showGrid = true;
+        
+        const mainContainer = document.getElementById('main-container');
+        const palette = document.getElementById('palette');
+        const canvasContainer = document.getElementById('canvas-container');
+        const canvas = document.getElementById('canvas');
+        const canvasTitle = document.getElementById('canvas-title');
+        const connectorSvg = document.getElementById('connector-svg');
+        const fileInput = document.getElementById('file-input');
+        const modal = document.getElementById('template-modal');
+        const templateList = document.getElementById('template-list');
+        const infoPanel = document.getElementById('info-panel');
+        const infoTitle = document.getElementById('info-title');
+        const infoContent = document.getElementById('info-panel-content');
+        const dynamicTooltip = document.getElementById('dynamic-tooltip');
+        const mobileOverlay = document.getElementById('mobile-overlay');
+        const mobilePaletteBtn = document.getElementById('mobile-palette-btn');
+        const mobileInfoBtn = document.getElementById('mobile-info-btn');
+        const toggleGridBtn = document.getElementById('toggle-grid-btn');
+        const centerContentBtn = document.getElementById('center-content-btn');
+
+        // --- Initialisation ---
+        const init = () => {
+            renderPalette();
+            renderTemplates();
+            setupEventListeners();
+            if (window.innerWidth >= 768) {
+                mainContainer.classList.remove('palette-hidden');
+                palette.classList.remove('hidden');
+            }
+        };
+        
+        // --- Rendering Functions ---
+        const renderPalette = () => {
+            let html = '';
+            for (const provider in CLOUD_SERVICES) {
+                const providerData = CLOUD_SERVICES[provider];
+                html += `
+                    <div class="mb-4 p-3 rounded-lg" style="background-color: ${providerData.bgColor};">
+                        <h3 class="flex items-center gap-2 font-semibold text-slate-800 text-md mb-3">
+                            <div class="flex items-center justify-center w-6 h-6">${providerData.logo}</div> 
+                            ${provider}
+                        </h3>`;
+                
+                for (const category in providerData.services) {
+                    html += `
+                        <div class="mt-4">
+                            <h4 class="font-medium text-slate-500 text-sm mb-2 px-2">${category}</h4>
+                            <div class="grid grid-cols-4 gap-2">`;
+                    
+                    providerData.services[category].forEach(service => {
+                        const iconSvg = (ICONS[service.icon] || '').replace('<svg', `<svg fill="${providerData.color}"`);
+                        html += `
+                            <div class="service-icon p-2 rounded-lg text-center group" draggable="true" data-service-id="${service.id}">
+                                <div class="w-8 h-8 mx-auto flex items-center justify-center text-slate-700">${iconSvg}</div>
+                                <span class="text-xs font-medium text-slate-600 mt-1 block">${service.name}</span>
+                                <div class="tooltip" style="display: none;">
+                                    <strong>What it is:</strong> ${service.desc}<br><br>
+                                    <strong>Typical Use Case:</strong> ${service.useCase}
+                                </div>
+                            </div>`;
+                    });
+                    
+                    html += `</div></div>`;
+                }
+                html += `</div>`;
+            }
+            palette.querySelector('.sidebar-content').innerHTML = html;
+        };
+        
+        const renderTemplates = () => { 
+            let html = ''; 
+            for (const key in architectureTemplates) { 
+                const template = architectureTemplates[key]; 
+                html += `
+                    <div class="template-card p-4 rounded-lg cursor-pointer bg-white" data-template-key="${key}">
+                        <h4 class="font-bold text-lg mb-2">${template.title}</h4>
+                        <p class="text-sm text-gray-600 mb-3">${template.description}</p>
+                        <div class="text-xs font-medium" style="color: var(--brand-primary);">Click to load →</div>
+                    </div>`; 
+            } 
+            templateList.innerHTML = html; 
+        };
+        
+        const renderCanvas = () => {
+            canvas.innerHTML = '';
+            for (const id in state.icons) { 
+                canvas.appendChild(createIconElement(state.icons[id])); 
+            }
+            renderConnections();
+            document.getElementById('canvas-placeholder').style.display = Object.keys(state.icons).length > 0 ? 'none' : 'flex';
+        };
+        
+        const applyTransform = () => {
+            const transform = `translate(${transformState.x}px, ${transformState.y}px) scale(${transformState.scale})`;
+            canvas.style.transform = transform;
+            connectorSvg.style.transform = transform;
+            document.getElementById('zoom-level').textContent = `${Math.round(transformState.scale * 100)}%`;
+        };
+        
+        const createIconElement = (iconData) => {
+            const { id, service, x, y } = iconData;
+            const serviceInfo = findServiceById(service.id);
+            const providerInfo = findProviderByServiceId(service.id);
+            const wrapper = document.createElement('div');
+            wrapper.id = `icon-${id}`;
+            wrapper.className = 'canvas-icon';
+            if (state.selectedIconId === id) wrapper.classList.add('selected');
+            wrapper.style.left = `${x}px`;
+            wrapper.style.top = `${y}px`;
+            wrapper.dataset.serviceId = service.id;
+            const iconSvg = (ICONS[serviceInfo.icon] || '').replace('<svg', `<svg fill="${providerInfo.color}"`);
+            wrapper.innerHTML = `
+                <button class="remove-icon-btn absolute top-2 right-2 w-6 h-6 flex items-center justify-center bg-white rounded-full shadow hover:bg-red-100 z-10" title="Remove Service" data-remove-id="${id}">
+                    <i class="fas fa-times text-red-500 text-xs"></i>
+                </button>
+                ${iconSvg}
+                <span class="font-medium text-slate-700">${serviceInfo.name}</span>
+                <div class="connector-handle"></div>
+                <div class="tooltip tooltip-canvas">
+                    <strong>${serviceInfo.name}:</strong> ${serviceInfo.desc}
+                </div>`;
+            return wrapper;
+        };
+        
+        const renderConnections = () => { 
+            let svgHtml = ''; 
+            state.connections.forEach((conn, idx) => { 
+                const startIcon = state.icons[conn.from]; 
+                const endIcon = state.icons[conn.to]; 
+                if (startIcon && endIcon) { 
+                    const startX = startIcon.x + 45; 
+                    const startY = startIcon.y + 45; 
+                    const endX = endIcon.x + 45; 
+                    const endY = endIcon.y + 45; 
+                    // Draw connection line
+                    svgHtml += `
+                        <line x1="${startX}" y1="${startY}" x2="${endX}" y2="${endY}" 
+                              class="connector-line" stroke-width="2" marker-end="url(#arrowhead)" data-conn-idx="${idx}" style="pointer-events:none;" />
+                    `;
+                    // Draw remove button (midpoint)
+                    const midX = (startX + endX) / 2;
+                    const midY = (startY + endY) / 2;
+                    svgHtml += `
+                        <foreignObject x="${midX - 12}" y="${midY - 12}" width="24" height="24">
+                            <button class="remove-conn-btn" data-conn-idx="${idx}" style="width:24px;height:24px;background:white;border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,0.12);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;" title="Remove Connection">
+                                <i class="fas fa-times" style="color:#E53E3E;font-size:14px;"></i>
+                            </button>
+                        </foreignObject>
+                    `;
+                } 
+            }); 
+            
+            connectorSvg.innerHTML = `
+                <defs>
+                    <marker id="arrowhead" markerWidth="10" markerHeight="7" 
+                    refX="9" refY="3.5" orient="auto">
+                        <polygon points="0 0, 10 3.5, 0 7" class="connector-line" fill="var(--text-secondary)" />
+                    </marker>
+                    <marker id="arrowhead-temp" markerWidth="10" markerHeight="7" 
+                    refX="9" refY="3.5" orient="auto">
+                        <polygon points="0 0, 10 3.5, 0 7" class="connector-line-temp" fill="var(--brand-primary)" />
+                    </marker>
+                </defs>
+                ${svgHtml}
+            `;
+        };
+        
+        const toggleGrid = () => {
+            showGrid = !showGrid;
+            if (showGrid) {
+                canvas.style.backgroundImage = 'radial-gradient(var(--border-color) 1px, transparent 1px)';
+                toggleGridBtn.innerHTML = '<i class="fas fa-th"></i>';
+            } else {
+                canvas.style.backgroundImage = 'none';
+                toggleGridBtn.innerHTML = '<i class="fas fa-th-large"></i>';
+            }
+        };
+        
+        const centerContent = () => {
+            if (Object.keys(state.icons).length === 0) {
+                resetView();
+                return;
+            }
+            
+            let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+            for (const id in state.icons) {
+                const icon = state.icons[id];
+                minX = Math.min(minX, icon.x);
+                minY = Math.min(minY, icon.y);
+                maxX = Math.max(maxX, icon.x + 90);
+                maxY = Math.max(maxY, icon.y + 90);
+            }
+            
+            const contentWidth = maxX - minX;
+            const contentHeight = maxY - minY;
+            const containerWidth = canvasContainer.clientWidth;
+            const containerHeight = canvasContainer.clientHeight;
+            
+            const scaleX = containerWidth / (contentWidth + 100);
+            const scaleY = containerHeight / (contentHeight + 100);
+            const scale = Math.min(scaleX, scaleY, 1);
+            
+            const centerX = minX + contentWidth / 2;
+            const centerY = minY + contentHeight / 2;
+            const targetX = containerWidth / 2 - centerX * scale;
+            const targetY = containerHeight / 2 - centerY * scale;
+            
+            transformState = { x: targetX, y: targetY, scale };
+            applyTransform();
+        };
+
+        // --- Event Listeners Setup ---
+        const setupEventListeners = () => {
+            // Palette events
+            palette.addEventListener('dragstart', e => { 
+                const serviceIcon = e.target.closest('.service-icon');
+                if (serviceIcon) { 
+                    e.dataTransfer.setData('text/plain', serviceIcon.dataset.serviceId); 
+                } 
+            });
+            
+            palette.addEventListener('click', e => { 
+                const icon = e.target.closest('.service-icon'); 
+                if (icon) { 
+                    showInfoPanel(icon.dataset.serviceId); 
+                }
+            });
+            
+            // Canvas events
+            canvasContainer.addEventListener('dragover', e => e.preventDefault());
+            canvasContainer.addEventListener('drop', handleCanvasDrop);
+            canvasContainer.addEventListener('mousedown', handleCanvasMouseDown);
+            canvasContainer.addEventListener('mousemove', handleMouseMove);
+            canvasContainer.addEventListener('mouseup', handleMouseUp);
+            canvasContainer.addEventListener('mouseleave', handleMouseUp);
+            canvasContainer.addEventListener('wheel', handleZoom, { passive: false });
+            // Remove icon button
+            canvas.addEventListener('pointerdown', function(e) {
+                const btn = e.target.closest('.remove-icon-btn');
+                if (btn) {
+                    const id = parseInt(btn.getAttribute('data-remove-id'));
+                    removeIconFromState(id);
+                    renderCanvas();
+                    e.stopPropagation();
+                }
+            });
+            // Remove connection button
+            connectorSvg.addEventListener('pointerdown', function(e) {
+                const btn = e.target.closest('.remove-conn-btn');
+                if (btn) {
+                    const idx = parseInt(btn.getAttribute('data-conn-idx'));
+                    state.connections.splice(idx, 1);
+                    renderCanvas();
+                    e.stopPropagation();
+                }
+            });
+            
+            // Keyboard events
+            document.addEventListener('keydown', handleKeyDown);
+            
+            // Toolbar buttons
+            document.getElementById('save-btn').addEventListener('click', saveDiagram);
+            document.getElementById('load-btn').addEventListener('click', () => fileInput.click());
+            document.getElementById('clear-btn').addEventListener('click', clearCanvas);
+            document.getElementById('template-btn').addEventListener('click', openModal);
+            document.getElementById('close-modal-btn').addEventListener('click', closeModal);
+            document.getElementById('cancel-modal-btn').addEventListener('click', closeModal);
+            document.getElementById('info-close-btn').addEventListener('click', hideInfoPanel);
+            document.getElementById('zoom-in-btn').addEventListener('click', () => zoom(1.2));
+            document.getElementById('zoom-out-btn').addEventListener('click', () => zoom(0.8));
+            document.getElementById('zoom-reset-btn').addEventListener('click', resetView);
+            toggleGridBtn.addEventListener('click', toggleGrid);
+            centerContentBtn.addEventListener('click', centerContent);
+            
+            // File input
+            fileInput.addEventListener('change', loadDiagram);
+            
+            // Template selection
+            templateList.addEventListener('click', e => { 
+                const card = e.target.closest('.template-card'); 
+                // *** THIS IS THE FIX for the template click issue ***
+                if (card) {
+                    generateFromTemplate(card.getAttribute('data-template-key'));
+                }
+            });
+            
+            // Mobile view handlers
+            mobilePaletteBtn.addEventListener('click', () => {
+                palette.classList.toggle('show');
+                mobileOverlay.classList.toggle('show');
+            });
+            
+            mobileInfoBtn.addEventListener('click', () => {
+                infoPanel.classList.toggle('show');
+                mobileOverlay.classList.toggle('show');
+            });
+            
+            mobileOverlay.addEventListener('click', () => {
+                palette.classList.remove('show');
+                infoPanel.classList.remove('show');
+                mobileOverlay.classList.remove('show');
+            });
+            
+            // Close modals with ESC key
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    if (!modal.classList.contains('hidden')) closeModal();
+                    if (palette.classList.contains('show')) {
+                        palette.classList.remove('show');
+                        mobileOverlay.classList.remove('show');
+                    }
+                    if (infoPanel.classList.contains('show')) {
+                        infoPanel.classList.remove('show');
+                        mobileOverlay.classList.remove('show');
+                    }
+                }
+            });
+        };
+
+        // --- Event Handlers ---
+        const handleCanvasDrop = (e) => { 
+            e.preventDefault(); 
+            const serviceId = e.dataTransfer.getData('text/plain'); 
+            if (!serviceId) return; 
+            const rect = canvasContainer.getBoundingClientRect(); 
+            const x = (e.clientX - rect.left - transformState.x) / transformState.scale - 45; 
+            const y = (e.clientY - rect.top - transformState.y) / transformState.scale - 45; 
+            addIconToState(serviceId, x, y); 
+            renderCanvas(); 
+        };
+        
+        const handleCanvasMouseDown = (e) => {
+            const iconElement = e.target.closest('.canvas-icon');
+            if (iconElement) {
+                const iconId = parseInt(iconElement.id.replace('icon-', ''));
+                state.selectedIconId = iconId;
+                showInfoPanel(state.icons[iconId].service.id);
+                
+                if (e.target.classList.contains('connector-handle')) { 
+                    state.isConnecting = true; 
+                    state.connectionStartId = iconId; 
+                } else { 
+                    const rect = canvasContainer.getBoundingClientRect(); 
+                    dragInfo = { 
+                        isDragging: true, 
+                        id: iconId, 
+                        startX: (e.clientX - rect.left - transformState.x) / transformState.scale, 
+                        startY: (e.clientY - rect.top - transformState.y) / transformState.scale, 
+                        initialX: state.icons[iconId].x, 
+                        initialY: state.icons[iconId].y 
+                    }; 
+                }
+            } else { 
+                panState = { isPanning: true, startX: e.clientX, startY: e.clientY }; 
+                canvasContainer.classList.add('panning'); 
+                state.selectedIconId = null; 
+                hideInfoPanel(); 
+            }
+            renderCanvas();
+        };
+        
+        const handleMouseMove = (e) => {
+            e.preventDefault();
+            
+            if (dragInfo.isDragging) {
+                const rect = canvasContainer.getBoundingClientRect();
+                const mouseX = (e.clientX - rect.left - transformState.x) / transformState.scale;
+                const mouseY = (e.clientY - rect.top - transformState.y) / transformState.scale;
+                state.icons[dragInfo.id].x = dragInfo.initialX + (mouseX - dragInfo.startX);
+                state.icons[dragInfo.id].y = dragInfo.initialY + (mouseY - dragInfo.startY);
+                renderCanvas();
+            } else if (panState.isPanning) {
+                const dx = e.clientX - panState.startX; 
+                const dy = e.clientY - panState.startY;
+                panState.startX = e.clientX; 
+                panState.startY = e.clientY;
+                transformState.x += dx; 
+                transformState.y += dy;
+                applyTransform();
+            }
+            
+            if (state.isConnecting) { 
+                const startIcon = state.icons[state.connectionStartId]; 
+                const rect = canvasContainer.getBoundingClientRect(); 
+                const startX = startIcon.x + 45; 
+                const startY = startIcon.y + 45; 
+                const mouseX = (e.clientX - rect.left - transformState.x) / transformState.scale; 
+                const mouseY = (e.clientY - rect.top - transformState.y) / transformState.scale; 
+                
+                let permanentLinesHTML = '';
+                state.connections.forEach(conn => {
+                    const from = state.icons[conn.from];
+                    const to = state.icons[conn.to];
+                    if (from && to) {
+                        permanentLinesHTML += `<line x1="${from.x + 45}" y1="${from.y + 45}" x2="${to.x + 45}" y2="${to.y + 45}" class="connector-line" stroke-width="2" marker-end="url(#arrowhead)" />`;
+                    }
+                });
+
+                const tempLineHTML = `
+                    <line x1="${startX}" y1="${startY}" x2="${mouseX}" y2="${mouseY}" 
+                          class="connector-line-temp" stroke-width="2" stroke-dasharray="5,5" 
+                          marker-end="url(#arrowhead-temp)" />`;
+
+                connectorSvg.innerHTML = `
+                    <defs>
+                        <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                            <polygon points="0 0, 10 3.5, 0 7" class="connector-line" fill="var(--text-secondary)" />
+                        </marker>
+                        <marker id="arrowhead-temp" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                            <polygon points="0 0, 10 3.5, 0 7" class="connector-line-temp" fill="var(--brand-primary)" />
+                        </marker>
+                    </defs>
+                    ${permanentLinesHTML}
+                    ${tempLineHTML}
+                `;
+            }
+        };
+        
+        const handleMouseUp = (e) => {
+            if (dragInfo.isDragging) dragInfo = {};
+            if (panState.isPanning) { panState.isPanning = false; canvasContainer.classList.remove('panning'); }
+            
+            if (state.isConnecting) {
+                const endIconElement = document.elementFromPoint(e.clientX, e.clientY)?.closest('.canvas-icon');
+                if (endIconElement) { 
+                    const endIconId = parseInt(endIconElement.id.replace('icon-', '')); 
+                    if (state.connectionStartId !== endIconId) addConnectionToState(state.connectionStartId, endIconId); 
+                }
+                state.isConnecting = false; 
+                state.connectionStartId = null;
+                renderCanvas();
+            }
+        };
+        
+        const handleKeyDown = (e) => { 
+            if ((e.key === 'Delete' || e.key === 'Backspace') && state.selectedIconId !== null) { 
+                removeIconFromState(state.selectedIconId); 
+                renderCanvas(); 
+            } 
+        };
+        
+        const handleZoom = (e) => { 
+            e.preventDefault(); 
+            const zoomIntensity = 0.1; 
+            const scale = e.deltaY < 0 ? 1 + zoomIntensity : 1 - zoomIntensity; 
+            zoom(scale, e.clientX, e.clientY); 
+        };
+
+        // --- Core Actions ---
+        const saveDiagram = () => { 
+            const projectName = document.getElementById('project-name').value.trim().replace(/\s+/g, '-') || 'cloud-architecture'; 
+            const dataStr = JSON.stringify({state, transformState}, null, 2); 
+            const blob = new Blob([dataStr], { type: 'application/json' }); 
+            const a = document.createElement('a'); 
+            a.href = URL.createObjectURL(blob); 
+            a.download = `${projectName}.json`; 
+            a.click(); 
+            URL.revokeObjectURL(a.href); 
+            showNotification('Diagram saved successfully!', 'success'); 
+        };
+        
+        const loadDiagram = (e) => { 
+            const file = e.target.files[0]; 
+            if (!file) return; 
+            const reader = new FileReader(); 
+            reader.onload = (event) => { 
+                try { 
+                    const data = JSON.parse(event.target.result); 
+                    resetState(); 
+                    state = data.state; 
+                    transformState = data.transformState || { x: 0, y: 0, scale: 1}; 
+                    nextId = Math.max(0, ...Object.keys(state.icons).map(Number)) + 1; 
+                    renderCanvas(); 
+                    applyTransform(); 
+                    showNotification('Diagram loaded successfully!', 'success'); 
+                } catch (err) { 
+                    console.error(err); 
+                    showNotification('Invalid diagram file. Please check the format.', 'error'); 
+                } 
+            }; 
+            reader.readAsText(file); 
+            fileInput.value = ''; 
+        };
+        
+        const clearCanvas = () => { 
+            if (confirm('Are you sure you want to clear the canvas? All your work will be lost.')) { 
+                resetState(); 
+                renderCanvas(); 
+                canvasTitle.classList.remove('visible'); 
+                resetView(); 
+                showNotification('Canvas cleared.', 'info'); 
+            } 
+        };
+        
+        const generateFromTemplate = (key) => { 
+            if (Object.keys(state.icons).length > 0 && !confirm('This will clear the current canvas. Continue?')) return; 
+            resetState(); 
+            const template = architectureTemplates[key]; 
+            const newIds = []; 
+            template.icons.forEach(t => { 
+                const newId = addIconToState(t.serviceId, t.x, t.y); 
+                newIds.push(newId); 
+            }); 
+            template.connections.forEach(c => addConnectionToState(newIds[c.from], newIds[c.to])); 
+            canvasTitle.textContent = template.title; 
+            canvasTitle.classList.add('visible'); 
+            renderCanvas(); 
+            centerContent();
+            closeModal(); 
+        };
+        
+        const zoom = (factor, clientX, clientY) => {
+            const newScale = Math.max(0.25, Math.min(3, transformState.scale * factor));
+            if(newScale === transformState.scale) return;
+            
+            const rect = canvasContainer.getBoundingClientRect();
+            const mouseX = clientX ? clientX - rect.left : rect.width / 2; 
+            const mouseY = clientY ? clientY - rect.top : rect.height / 2;
+            
+            transformState.x = mouseX - (mouseX - transformState.x) * (newScale / transformState.scale);
+            transformState.y = mouseY - (mouseY - transformState.y) * (newScale / transformState.scale);
+            transformState.scale = newScale;
+            
+            applyTransform();
+        };
+        
+        const resetView = () => { 
+            transformState = { x: 0, y: 0, scale: 1 }; 
+            applyTransform(); 
+        };
+        
+        const showInfoPanel = (serviceId) => {
+            const service = findServiceById(serviceId); 
+            if (!service) return;
+            
+            if (window.innerWidth < 768) {
+                infoPanel.classList.add('show');
+                mobileOverlay.classList.add('show');
+            } else {
+                mainContainer.classList.add('info-visible'); 
+                infoPanel.classList.remove('hidden');
+            }
+            
+            const provider = findProviderByServiceId(serviceId);
+            infoTitle.innerHTML = `<div class="flex items-center gap-3">${provider.logo} <span class="font-bold">${service.name}</span></div>`;
+            
+            let featuresHtml = service.features ? `
+                <div class="info-card mt-4">
+                    <h4>Key Features</h4>
+                    <ul class="list-disc pl-5">
+                        ${service.features.map(f => `<li>${f}</li>`).join('')}
+                    </ul>
+                </div>
+            ` : '';
+            
+            infoContent.innerHTML = `
+                <div class="info-card">
+                    <h4>Description</h4>
+                    <p>${service.desc}</p>
+                </div>
+                
+                <div class="info-card">
+                    <h4>Typical Use Case</h4>
+                    <p>${service.useCase}</p>
+                </div>
+                
+                ${featuresHtml}
+            `;
+        };
+        
+        const hideInfoPanel = () => { 
+            if (window.innerWidth < 768) {
+                infoPanel.classList.remove('show');
+                mobileOverlay.classList.remove('show');
+            } else {
+                mainContainer.classList.remove('info-visible'); 
+                infoPanel.classList.add('hidden'); 
+            }
+        };
+        
+        // --- State Modification ---
+        const addIconToState = (serviceId, x, y) => { 
+            const id = nextId++; 
+            state.icons[id] = { id, service: { id: serviceId }, x, y }; 
+            return id; 
+        };
+        
+        const removeIconFromState = (iconId) => { 
+            delete state.icons[iconId]; 
+            state.connections = state.connections.filter(c => c.from !== iconId && c.to !== iconId); 
+            state.selectedIconId = null; 
+            hideInfoPanel(); 
+        };
+        
+        const addConnectionToState = (fromId, toId) => { 
+            const exists = state.connections.some(c => (c.from === fromId && c.to === toId) || (c.from === toId && c.to === fromId)); 
+            if (!exists) state.connections.push({ from: fromId, to: toId }); 
+        };
+        
+        const resetState = () => { 
+            state = { icons: {}, connections: [], selectedIconId: null, isConnecting: false, connectionStartId: null }; 
+            nextId = 0; 
+            hideInfoPanel(); 
+        };
+
+        // --- Utility Functions ---
+        const findServiceById = (id) => { 
+            for (const pKey in CLOUD_SERVICES) { 
+                for (const cKey in CLOUD_SERVICES[pKey].services) { 
+                    const service = CLOUD_SERVICES[pKey].services[cKey].find(s => s.id === id); 
+                    if (service) return service; 
+                } 
+            } 
+            return null; 
+        };
+        
+        const findProviderByServiceId = (id) => { 
+            for (const pKey in CLOUD_SERVICES) { 
+                for (const cKey in CLOUD_SERVICES[pKey].services) { 
+                    const service = CLOUD_SERVICES[pKey].services[cKey].find(s => s.id === id); 
+                    if (service) return CLOUD_SERVICES[pKey]; 
+                } 
+            } 
+            return null; 
+        };
+        
+        const showNotification = (message, type = 'info') => { 
+            const n = document.getElementById('notification'); 
+            n.textContent = message; 
+            const c = { 
+                success: 'bg-brand-secondary text-white', 
+                error: 'bg-red-500 text-white', 
+                info: 'bg-brand-primary-light text-white' 
+            }; 
+            n.className = `notification fixed bottom-5 left-1/2 -translate-x-1/2 px-6 py-3 rounded-lg font-semibold z-50 ${c[type]}`; 
+            n.classList.add('show'); 
+            setTimeout(() => n.classList.remove('show'), 3000); 
+        };
+        
+        const openModal = () => {
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0', 'invisible');
+                modal.querySelector('.modal').classList.add('show');
+            }, 10);
+        };
+        
+        const closeModal = () => {
+            modal.querySelector('.modal').classList.remove('show');
+            modal.classList.add('opacity-0');
+            setTimeout(() => {
+                modal.classList.add('hidden', 'invisible');
+            }, 300);
+        };
+
+        // --- Start App ---
+        init();
+    });
+    </script>
+</body>
+</html>

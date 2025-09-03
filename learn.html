@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learn - Cloud Architect Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --brand-primary: #6B46C1;
+            --brand-primary-light: #805AD5;
+            --brand-primary-dark: #553C9A;
+            --background-light: #F7FAFC;
+            --background-medium: #EDF2F7;
+            --text-primary: #2D3748;
+            --text-secondary: #4A5568;
+            --border-color: #CBD5E0;
+            --shadow-light: rgba(0, 0, 0, 0.05);
+            --modal-bg: rgba(0,0,0,0.5);
+        }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--background-light); 
+            color: var(--text-primary);
+        }
+        .card {
+            background-color: white;
+            border-radius: 0.75rem;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px -1px var(--shadow-light);
+            transition: transform 0.3s cubic-bezier(.4,2,.3,1), box-shadow 0.3s, border-color 0.3s;
+            cursor: pointer;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            border-color: var(--brand-primary);
+            background: linear-gradient(120deg, var(--background-medium) 0%, #fff 100%);
+            outline: 2px solid var(--brand-primary-light);
+        }
+        .btn-primary {
+            background-color: var(--brand-primary);
+            color: white;
+            box-shadow: 0 2px 8px -2px var(--brand-primary-light);
+            transition: background 0.2s, box-shadow 0.2s;
+        }
+        .btn-primary:hover {
+            background-color: var(--brand-primary-dark);
+            box-shadow: 0 4px 12px -2px var(--brand-primary-dark);
+        }
+        nav a:hover:not(.active) { background-color: var(--background-medium); }
+
+        /* Modal styles */
+        .modal-bg {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: var(--modal-bg);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 50;
+        }
+        .modal {
+            background: #fff;
+            border-radius: 1rem;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+            padding: 2rem 2.5rem;
+            max-width: 400px;
+            width: 90vw;
+            text-align: center;
+            position: relative;
+            animation: modalIn 0.3s cubic-bezier(.4,2,.3,1);
+        }
+        @keyframes modalIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        .modal-close {
+            position: absolute;
+            top: 1rem; right: 1rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--brand-primary);
+            cursor: pointer;
+        }
+        .card:focus {
+            outline: 2px solid var(--brand-primary-dark);
+        }
+        .card .btn-primary:focus {
+            outline: 2px solid var(--brand-primary-dark);
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+
+    <nav class="bg-white shadow-sm z-30 border-b" style="border-color: var(--border-color);">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <svg class="h-8 w-8" style="color: var(--brand-primary);" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/>
+                    </svg>
+                    <span class="font-bold text-xl ml-2 text-gray-800">Cloud Architect Pro</span>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="index.html" class="text-gray-500 px-3 py-2 rounded-md text-sm font-medium">Visualiser</a>
+                        <a href="learn.html" class="active text-white px-3 py-2 rounded-md text-sm font-medium" style="background-color: var(--brand-primary);">Learn</a>
+                        <a href="quiz.html" class="text-gray-500 px-3 py-2 rounded-md text-sm font-medium">Quiz</a>
+                        <a href="resources.html" class="text-gray-500 px-3 py-2 rounded-md text-sm font-medium">Resources</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-grow container mx-auto px-6 py-12">
+        <header class="text-center mb-12">
+            <h1 class="text-5xl font-bold tracking-tight" style="color: var(--brand-primary);">Learning Pathways</h1>
+            <p class="mt-4 text-lg" style="color: var(--text-secondary);">Start your cloud journey here. Begin with the fundamentals, then dive into your chosen provider.</p>
+        </header>
+
+        <section class="mb-16">
+            <h2 class="text-3xl font-bold border-b pb-4 mb-8 flex items-center gap-4"><i class="fas fa-cloud text-gray-400"></i>Cloud Computing Fundamentals</h2>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="card p-6 flex flex-col" tabindex="0" role="button" aria-label="What is Cloud Computing" onclick="openModal('Cloud Computing', 'Understand the core concepts, service models (IaaS, PaaS, SaaS), and deployment models (Public, Private, Hybrid).')">
+                    <h3 class="text-xl font-semibold mb-2">What is Cloud Computing?</h3>
+                    <p class="text-gray-600 flex-grow mb-4">Understand the core concepts, service models (IaaS, PaaS, SaaS), and deployment models (Public, Private, Hybrid).</p>
+                    <button class="btn-primary text-center font-bold py-2 px-4 rounded-lg" onclick="event.stopPropagation();openModal('Cloud Computing', 'Understand the core concepts, service models (IaaS, PaaS, SaaS), and deployment models (Public, Private, Hybrid).')">Start Module 1</button>
+                </div>
+                <div class="card p-6 flex flex-col" tabindex="0" role="button" aria-label="Core Cloud Services" onclick="openModal('Core Cloud Services', 'Learn about the essential building blocks: Compute, Storage, Databases, and Networking.')">
+                    <h3 class="text-xl font-semibold mb-2">Core Cloud Services</h3>
+                    <p class="text-gray-600 flex-grow mb-4">Learn about the essential building blocks: Compute, Storage, Databases, and Networking.</p>
+                    <button class="btn-primary text-center font-bold py-2 px-4 rounded-lg" onclick="event.stopPropagation();openModal('Core Cloud Services', 'Learn about the essential building blocks: Compute, Storage, Databases, and Networking.')">Start Module 2</button>
+                </div>
+                <div class="card p-6 flex flex-col" tabindex="0" role="button" aria-label="Security & Identity" onclick="openModal('Security & Identity', 'Discover the Shared Responsibility Model and fundamental security practices in the cloud.')">
+                    <h3 class="text-xl font-semibold mb-2">Security & Identity</h3>
+                    <p class="text-gray-600 flex-grow mb-4">Discover the Shared Responsibility Model and fundamental security practices in the cloud.</p>
+                    <button class="btn-primary text-center font-bold py-2 px-4 rounded-lg" onclick="event.stopPropagation();openModal('Security & Identity', 'Discover the Shared Responsibility Model and fundamental security practices in the cloud.')">Start Module 3</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="mb-16">
+            <h2 class="text-3xl font-bold border-b pb-4 mb-8 flex items-center gap-4"><i class="fab fa-aws" style="color: #FF9900;"></i>Getting Started with AWS</h2>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="card p-6">
+                    <h3 class="text-xl font-semibold mb-2">AWS Core Services</h3>
+                    <p class="text-gray-600 mb-4">A deep dive into EC2, S3, VPC, and RDS - the foundational services of AWS.</p>
+                    <a href="#" class="btn-primary text-center font-bold py-2 px-4 rounded-lg">Explore AWS Core</a>
+                </div>
+                <div class="card p-6">
+                    <h3 class="text-xl font-semibold mb-2">Serverless on AWS</h3>
+                    <p class="text-gray-600 mb-4">Learn how to build applications without managing servers using Lambda and DynamoDB.</p>
+                    <a href="#" class="btn-primary text-center font-bold py-2 px-4 rounded-lg">Go Serverless</a>
+                </div>
+                <div class="card p-6">
+                    <h3 class="text-xl font-semibold mb-2">AWS Certified Cloud Practitioner</h3>
+                    <p class="text-gray-600 mb-4">Follow a guided path to prepare for your first AWS certification exam.</p>
+                    <a href="#" class="btn-primary text-center font-bold py-2 px-4 rounded-lg">Get Certified</a>
+                </div>
+            </div>
+        </section>
+
+        <section class="mb-16">
+            <h2 class="text-3xl font-bold border-b pb-4 mb-8 flex items-center gap-4"><i class="fab fa-microsoft" style="color: #0078D4;"></i>Getting Started with Azure</h2>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="card p-6">
+                    <h3 class="text-xl font-semibold mb-2">Azure Core Services</h3>
+                    <p class="text-gray-600 mb-4">Explore Azure VMs, Blob Storage, Virtual Network, and SQL Database - the backbone of Azure cloud.</p>
+                    <a href="#" class="btn-primary text-center font-bold py-2 px-4 rounded-lg">Explore Azure Core</a>
+                </div>
+                <div class="card p-6">
+                    <h3 class="text-xl font-semibold mb-2">Serverless on Azure</h3>
+                    <p class="text-gray-600 mb-4">Build scalable apps with Azure Functions and Cosmos DB, no server management required.</p>
+                    <a href="#" class="btn-primary text-center font-bold py-2 px-4 rounded-lg">Go Serverless</a>
+                </div>
+                <div class="card p-6">
+                    <h3 class="text-xl font-semibold mb-2">Azure Fundamentals Certification</h3>
+                    <p class="text-gray-600 mb-4">Step-by-step guidance to prepare for the Microsoft Certified: Azure Fundamentals exam.</p>
+                    <a href="#" class="btn-primary text-center font-bold py-2 px-4 rounded-lg">Get Certified</a>
+                </div>
+            </div>
+        </section>
+
+        <section class="mb-16">
+            <h2 class="text-3xl font-bold border-b pb-4 mb-8 flex items-center gap-4"><i class="fab fa-google" style="color: #4285F4;"></i>Getting Started with GCP</h2>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="card p-6">
+                    <h3 class="text-xl font-semibold mb-2">GCP Core Services</h3>
+                    <p class="text-gray-600 mb-4">Learn about Compute Engine, Cloud Storage, VPC, and Cloud SQL - the essentials of Google Cloud.</p>
+                    <a href="#" class="btn-primary text-center font-bold py-2 px-4 rounded-lg">Explore GCP Core</a>
+                </div>
+                <div class="card p-6">
+                    <h3 class="text-xl font-semibold mb-2">Serverless on GCP</h3>
+                    <p class="text-gray-600 mb-4">Discover how to use Cloud Functions and Firestore for serverless development on GCP.</p>
+                    <a href="#" class="btn-primary text-center font-bold py-2 px-4 rounded-lg">Go Serverless</a>
+                </div>
+                <div class="card p-6">
+                    <h3 class="text-xl font-semibold mb-2">GCP Associate Cloud Engineer</h3>
+                    <p class="text-gray-600 mb-4">Follow a learning path to prepare for the GCP Associate Cloud Engineer certification.</p>
+                    <a href="#" class="btn-primary text-center font-bold py-2 px-4 rounded-lg">Get Certified</a>
+                </div>
+            </div>
+        </section>
+
+        </main>
+
+    <footer class="w-full py-6 mt-12" style="background-color: var(--background-medium); border-top: 1px solid var(--border-color);">
+        <div class="container mx-auto text-center" style="color: var(--text-secondary);">
+            <p>&copy; 2025 Cloud Architect Pro. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Modal for module details -->
+    <div id="modal-bg" class="modal-bg" style="display:none;">
+        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+            <button class="modal-close" onclick="closeModal()" aria-label="Close">&times;</button>
+            <h2 id="modal-title" class="text-2xl font-bold mb-4"></h2>
+            <p id="modal-desc" class="text-gray-700 mb-6"></p>
+            <button class="btn-primary py-2 px-4 rounded-lg w-full" onclick="closeModal()">Start Learning</button>
+        </div>
+    </div>
+
+    <script>
+    // Modal logic
+    function openModal(title, desc) {
+        document.getElementById('modal-title').textContent = title;
+        document.getElementById('modal-desc').textContent = desc;
+        document.getElementById('modal-bg').style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+    function closeModal() {
+        document.getElementById('modal-bg').style.display = 'none';
+        document.body.style.overflow = '';
+    }
+    // Accessibility: close modal on Escape
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeModal();
+    });
+    // Focus trap for modal
+    document.getElementById('modal-bg').addEventListener('click', function(e) {
+        if (e.target === this) closeModal();
+    });
+    </script>
+
+</body>
+</html>
