@@ -71,13 +71,13 @@ No backend or installation is required — everything runs client-side.
 1. **Clone the repository**:
 
    ```bash
-   git clone <[your-repo-url](https://github.com/Sanilpanchal23/Cloud-Architect-Pro)>
+   git clone <(https://github.com/Sanilpanchal23/Cloud-Architect-Pro)>
    cd Cloud-Architect-Pro
    ```
 
 2. **Open in your browser**:
 
-   * Visit or type `[index.html](https://sanilpanchal23.github.io/Cloud-Architect-Pro/)`
+   * Visit or type `(https://sanilpanchal23.github.io/Cloud-Architect-Pro/)`
 
 3. **No installation required**:
 
