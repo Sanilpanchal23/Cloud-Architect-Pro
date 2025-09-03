@@ -61,7 +61,7 @@ All terminology is presented in **UK English** for consistency and accessibility
 
 ## 🌐 Live Demo
 
-Run locally by opening `index.html` in your browser.
+Run locally by opening `https://sanilpanchal23.github.io/Cloud-Architect-Pro/` in your browser.
 No backend or installation is required — everything runs client-side.
 
 ---
@@ -71,14 +71,13 @@ No backend or installation is required — everything runs client-side.
 1. **Clone the repository**:
 
    ```bash
-   git clone <your-repo-url>
+   git clone <[your-repo-url](https://github.com/Sanilpanchal23/Cloud-Architect-Pro)>
    cd Cloud-Architect-Pro
    ```
 
 2. **Open in your browser**:
 
-   * Double-click `index.html`
-   * Or open manually in Chrome, Edge, or Firefox
+   * Visit or type `[index.html](https://sanilpanchal23.github.io/Cloud-Architect-Pro/)`
 
 3. **No installation required**:
 
